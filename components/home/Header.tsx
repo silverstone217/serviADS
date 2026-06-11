@@ -8,7 +8,7 @@ import SmallNavMenu from "./SmallNavMenu";
 import { usePathname } from "next/navigation";
 import AuthComponent from "../auth/AuthComponent";
 import { useGetUser } from "@/hooks/user";
-import UserAvatar from "../UserAvatar";
+import PopOverProfile from "../PopOverProfile";
 
 const Header = () => {
   const pathname = usePathname();
@@ -44,11 +44,7 @@ const Header = () => {
 
         {/* ACTION BUTTONS */}
         <div className="lg:flex items-center hidden gap-4">
-          {user ? (
-            <UserAvatar image={user.image} name={user.name} />
-          ) : (
-            <AuthComponent />
-          )}
+          <div>{user ? <PopOverProfile /> : <AuthComponent />}</div>
           <Button>
             <Link href={"/mon-espace"}>Créer une campagne</Link>
           </Button>

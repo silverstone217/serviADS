@@ -15,11 +15,17 @@ import {
 } from "../ui/select";
 import { useRouter } from "next/navigation";
 import { UploadCloud, HelpCircle, FileAudio, X, Rocket } from "lucide-react";
+import { useGetUser } from "@/hooks/user";
+import { toast } from "sonner";
+import AuthDialog from "./AuthDialog";
 
 export default function MainComponent() {
   const [companyName, setCompanyName] = useState("");
-  const [companyPhone, setCompanyPhone] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
   const [campaignName, setCampaignName] = useState("juillet-2026");
+
+  const [openAuthDialog, setOpenAuthDialog] = useState(false);
+  const { user } = useGetUser();
 
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -94,8 +100,44 @@ export default function MainComponent() {
   const totalprice =
     Number(audioDuration / 30) * costPerAudio + taxiNumber * costPerAudio;
 
+  const handleSubmit = async () => {
+    try {
+      setLoading(true);
+
+      // NO USER IN
+      if (!user) {
+        toast.error("Connectez-vous pour valider cette offre!");
+        setOpenAuthDialog(true);
+        return;
+      }
+
+      // NO AUDIO
+      if (!audioFile) {
+        toast.error("Veuillez entrer votre publicite audio");
+        return;
+      }
+
+      // NO INPUT
+      if (!companyName || !clientPhone) {
+        toast.error("Veuillez remplir tous les champs avant de validerr");
+        return;
+      }
+
+      // SEND TO DATABASE (CALL SERVER)
+
+      toast.success("No problem detected");
+
+      // SEND AUDIO FILE TO FIREBASE
+    } catch (error) {
+      console.log("SUBMIT AUDIO OFFER", error);
+      toast.error("Une erreur est survenue, veuillez reessayez plus tard!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="mx-auto max-w-6xl py-10 px-4">
+    <div className="mx-auto max-w-6xl py-10">
       {/* GRILLE PRINCIPALE DEUX COLONNES */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 items-start">
         {/* COLONNE GAUCHE : FORMULAIRES (Prend 2 colonnes sur 3) */}
@@ -140,14 +182,12 @@ export default function MainComponent() {
                     />
                   </div>
                   <div className="flex min-w-0 flex-col gap-2">
-                    <Label htmlFor="companyPhone">
-                      Téléphone de l&apos;entreprise
-                    </Label>
+                    <Label htmlFor="clientPhone">Téléphone du client</Label>
                     <Input
-                      id="companyPhone"
+                      id="clientPhone"
                       type="tel"
-                      value={companyPhone}
-                      onChange={(e) => setCompanyPhone(e.target.value)}
+                      value={clientPhone}
+                      onChange={(e) => setClientPhone(e.target.value)}
                       placeholder="0822550150"
                       disabled={loading}
                     />
@@ -427,10 +467,11 @@ export default function MainComponent() {
 
           {/* ACTION BUTTON */}
           <Button
-            type="submit"
+            type="button"
             size="lg"
             className="w-full mt-6 bg-blue-900 hover:bg-blue-950 text-white font-medium rounded-xl h-12 text-base shadow-sm transition-all flex items-center justify-center gap-2"
-            disabled={loading || !audioFile || !companyName || !companyPhone}
+            disabled={loading}
+            onClick={handleSubmit}
           >
             <span>Lancer ma campagne</span>
             <Rocket className="h-4 w-4" />
@@ -442,6 +483,11 @@ export default function MainComponent() {
           </p>
         </div>
       </div>
+
+      <AuthDialog
+        openAuthDialog={openAuthDialog}
+        setOpenAuthDialog={setOpenAuthDialog}
+      />
     </div>
   );
 }

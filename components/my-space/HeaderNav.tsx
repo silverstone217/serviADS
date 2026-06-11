@@ -9,7 +9,7 @@ const HeaderNav = () => {
   const pathname = usePathname();
 
   return (
-    <div className="w-full p-4 md:px-6 xl:px-8 gap-4 max-w-sm lg:max-w-md mx-auto">
+    <div className="w-full p-4 md:px-6 xl:px-8 gap-4 max-w-xl mx-auto">
       <div className="border p-4 grid grid-cols-2 rounded-lg gap-4">
         {DASHBOARD_LINKS.map((link) => {
           const Icon = link.icon;

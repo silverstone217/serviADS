@@ -64,13 +64,13 @@ const SmallNavMenu = () => {
         <div className="w-full p-4 flex items-center justify-center">
           {user ? (
             <div className="flex flex-col gap-3 w-full">
-              <div className="flex items-center gap-2.5">
+              <Link href={"/profil"} className="flex items-center gap-2.5">
                 <UserAvatar image={user.image} name={user.name} />
                 <div className="">
                   <h3 className="capitalize font-semibold">{user.name}</h3>
                   <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
-              </div>
+              </Link>
 
               <Button variant={"destructive"} className="w-full">
                 Deconnexion

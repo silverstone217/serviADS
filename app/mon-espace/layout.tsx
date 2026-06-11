@@ -1,7 +1,8 @@
 import { getUser } from "@/actions/user";
 import AuthComponent from "@/components/auth/AuthComponent";
 import HeaderNav from "@/components/my-space/HeaderNav";
-import UserAvatar from "@/components/UserAvatar";
+import PopOverProfile from "@/components/PopOverProfile";
+// import UserAvatar from "@/components/UserAvatar";
 import { inter } from "@/lib/fonts";
 import { Undo2 } from "lucide-react";
 import Link from "next/link";
@@ -25,11 +26,7 @@ async function MonEspaceLayout({ children }: MonEspaceLayoutProps) {
             <Undo2 />
           </Link>
           <h2 className={`text-xl font-bold ${inter.className}`}>Mon Espace</h2>
-          {user ? (
-            <UserAvatar image={user.image} name={user.name} />
-          ) : (
-            <AuthComponent />
-          )}
+          <div>{user ? <PopOverProfile /> : <AuthComponent />}</div>
         </div>
       </header>
 
