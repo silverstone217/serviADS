@@ -6,9 +6,13 @@ import React from "react";
 import { Button } from "../ui/button";
 import SmallNavMenu from "./SmallNavMenu";
 import { usePathname } from "next/navigation";
+import AuthComponent from "../auth/AuthComponent";
+import { useGetUser } from "@/hooks/user";
+import UserAvatar from "../UserAvatar";
 
 const Header = () => {
   const pathname = usePathname();
+  const { user } = useGetUser();
 
   return (
     <header className="w-full px-4 md:px-6 xl:px-8 py-4">
@@ -40,7 +44,11 @@ const Header = () => {
 
         {/* ACTION BUTTONS */}
         <div className="lg:flex items-center hidden gap-4">
-          <Button variant={"link"}>Connexion</Button>
+          {user ? (
+            <UserAvatar image={user.image} name={user.name} />
+          ) : (
+            <AuthComponent />
+          )}
           <Button>
             <Link href={"/mon-espace"}>Créer une campagne</Link>
           </Button>

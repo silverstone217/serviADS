@@ -38,15 +38,15 @@ export default function Hero() {
 
           {/* BUTTONS */}
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Link href={"/mon-espace"}>
-              <Button size="lg" className="gap-2">
+            <Link href={"/mon-espace"} className="w-full sm:w-fit">
+              <Button size="lg" className="gap-2 w-full">
                 Créer ma campagne
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
 
-            <Link href={"/solutions"}>
-              <Button variant="secondary" size="lg">
+            <Link href={"/solutions"} className="w-full sm:w-fit">
+              <Button variant="secondary" size="lg" className="w-full">
                 Découvrir les solutions
               </Button>
             </Link>

@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { inter, lato } from "@/lib/fonts";
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import AuthProvider from "@/components/providers/auth-provider";
 
 export const metadata: Metadata = {
   title: "SERVI ADS",
@@ -35,9 +36,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-
-          <Toaster />
+          <AuthProvider>
+            <main>{children}</main>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

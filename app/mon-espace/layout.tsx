@@ -1,5 +1,7 @@
+import { getUser } from "@/actions/user";
+import AuthComponent from "@/components/auth/AuthComponent";
 import HeaderNav from "@/components/my-space/HeaderNav";
-import { Button } from "@/components/ui/button";
+import UserAvatar from "@/components/UserAvatar";
 import { inter } from "@/lib/fonts";
 import { Undo2 } from "lucide-react";
 import Link from "next/link";
@@ -9,7 +11,9 @@ interface MonEspaceLayoutProps {
   children: React.ReactNode;
 }
 
-function MonEspaceLayout({ children }: MonEspaceLayoutProps) {
+async function MonEspaceLayout({ children }: MonEspaceLayoutProps) {
+  const user = await getUser();
+
   return (
     <div>
       <header className="">
@@ -21,9 +25,11 @@ function MonEspaceLayout({ children }: MonEspaceLayoutProps) {
             <Undo2 />
           </Link>
           <h2 className={`text-xl font-bold ${inter.className}`}>Mon Espace</h2>
-          <Button variant={"ghost"} className="text-primary" size={"sm"}>
-            <Link href={"/connexion"}>Connexion</Link>
-          </Button>
+          {user ? (
+            <UserAvatar image={user.image} name={user.name} />
+          ) : (
+            <AuthComponent />
+          )}
         </div>
       </header>
 
