@@ -1,7 +1,7 @@
 "use client";
 
 import { inter } from "@/lib/fonts";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
@@ -34,17 +34,19 @@ export default function MainComponent() {
   const router = useRouter();
 
   // Logique de calcul du résumé (Dynamique)
-  const costPerTaxiPerDay = 2.0;
-  const daysInMonth = 28; // Ajustable selon vos besoins business
-  const estimatedDiffusionsPerTaxiPerDay = 30;
+  const daysInMonth = Number(campaignDuration) * 7; // Ajustable selon vos besoins business
+  const estimatedDiffusionsPerTaxiPerDay = 12;
+
+  const [audioDuration, setAudioDuration] = useState(30); // Durée en secondes (Peut être calculée à partir du fichier audio)
+  const costPerAudio = 2;
+
+  const max_taxis = 5;
 
   const totalDiffusions =
     taxiNumber *
     estimatedDiffusionsPerTaxiPerDay *
     daysInMonth *
     Number(campaignDuration);
-  const totalEstimation =
-    taxiNumber * costPerTaxiPerDay * daysInMonth * Number(campaignDuration);
 
   // Drag & Drop Handlers
   const handleDrag = (e: React.DragEvent) => {
@@ -76,6 +78,22 @@ export default function MainComponent() {
     }
   };
 
+  // AUDIO DURATION CALCULATION (Optional, can be enhanced with a library like 'music-metadata-browser') in secondes
+
+  useEffect(() => {
+    if (audioFile) {
+      const audio = new Audio(URL.createObjectURL(audioFile));
+      audio.addEventListener("loadedmetadata", () => {
+        const duration = Math.round(audio.duration);
+        setAudioDuration(duration);
+      });
+    }
+  }, [audioFile]);
+
+  // Calculate totalprice by duration and nbr of taxis
+  const totalprice =
+    Number(audioDuration / 30) * costPerAudio + taxiNumber * costPerAudio;
+
   return (
     <div className="mx-auto max-w-6xl py-10 px-4">
       {/* GRILLE PRINCIPALE DEUX COLONNES */}
@@ -83,9 +101,13 @@ export default function MainComponent() {
         {/* COLONNE GAUCHE : FORMULAIRES (Prend 2 colonnes sur 3) */}
         <div className="flex flex-col gap-8 lg:col-span-2">
           {/* 1. COMPANY INFORMATION */}
-          <div className="flex w-full gap-4 rounded-xl bg-muted/50 p-4 shadow-sm md:p-6">
+          <div className="flex w-full gap-4 rounded-xl bg-muted/50 p-4 shadow-sm md:p-6 group">
             <div className="shrink-0">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
+              <span
+                className="md:flex hidden h-8 w-8 items-center  bg-muted
+               border border-muted-foreground/30
+              justify-center rounded-full group-focus:bg-primary font-bold text-primary-foreground"
+              >
                 1
               </span>
             </div>
@@ -149,7 +171,10 @@ export default function MainComponent() {
           {/* 2. AUDIO FILE SECTION */}
           <div className="flex w-full gap-4 rounded-xl bg-muted/50 p-4 shadow-sm md:p-6">
             <div className="shrink-0">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted border border-muted-foreground/30 font-bold text-muted-foreground">
+              <span
+                className="md:flex hidden h-8 w-8 items-center justify-center rounded-full bg-muted 
+              border border-muted-foreground/30 font-bold text-primary-foreground"
+              >
                 2
               </span>
             </div>
@@ -168,7 +193,8 @@ export default function MainComponent() {
                   </div>
                   <button
                     type="button"
-                    className="flex items-center gap-2 rounded-full border border-emerald-200/60 bg-emerald-50/50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
+                    className="flex items-center gap-2 rounded-full border border-emerald-200/60 
+                    bg-emerald-50/50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
                   >
                     <HelpCircle className="h-4 w-4 text-emerald-600" />
                     <span>Besoin d&apos;aide ?</span>
@@ -176,11 +202,12 @@ export default function MainComponent() {
                 </div>
 
                 <div
-                  className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all ${
-                    dragActive
-                      ? "border-primary bg-primary/5"
-                      : "border-muted-foreground/20 bg-background hover:bg-muted/30"
-                  }`}
+                  className={`relative flex flex-col items-center justify-center rounded-xl border-2 
+                    border-dashed p-8 text-center transition-all ${
+                      dragActive
+                        ? "border-primary bg-primary/5"
+                        : "border-muted-foreground/20 bg-background hover:bg-muted/30"
+                    }`}
                   onDragEnter={handleDrag}
                   onDragOver={handleDrag}
                   onDragLeave={handleDrag}
@@ -246,7 +273,10 @@ export default function MainComponent() {
           {/* 3. PARAMÈTRES DE DIFFUSION */}
           <div className="flex w-full gap-4 rounded-xl bg-muted/50 p-4 shadow-sm md:p-6">
             <div className="shrink-0">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted border border-muted-foreground/30 font-bold text-muted-foreground">
+              <span
+                className="md:flex hidden h-8 w-8 items-center justify-center rounded-full bg-muted
+               border border-muted-foreground/30 font-bold text-primary-foreground"
+              >
                 3
               </span>
             </div>
@@ -273,7 +303,7 @@ export default function MainComponent() {
                       defaultValue={[50]}
                       value={[taxiNumber]}
                       onValueChange={(value) => setTaxiNumber(value[0])}
-                      max={200}
+                      max={max_taxis}
                       min={1}
                       step={1}
                       className="flex-1"
@@ -350,16 +380,25 @@ export default function MainComponent() {
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Durée</span>
+              <span className="text-muted-foreground">
+                Durée de la campagne
+              </span>
               <span className="font-semibold text-foreground">
                 {campaignDuration} semaine{campaignDuration > "1" && "s"}
               </span>
             </div>
 
             <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Durée d&apos;audio</span>
+              <span className="font-semibold text-foreground">
+                {audioDuration} secondes
+              </span>
+            </div>
+
+            <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Coût par taxi/jour</span>
               <span className="font-semibold text-foreground">
-                ${costPerTaxiPerDay.toFixed(2)}
+                ${costPerAudio.toFixed(2)}
               </span>
             </div>
 
@@ -378,7 +417,7 @@ export default function MainComponent() {
             </p>
             <div className="flex items-baseline justify-center gap-1">
               <span className="text-4xl font-extrabold tracking-tight text-blue-900">
-                ${totalEstimation.toLocaleString()}
+                ${totalprice.toFixed(2)}
               </span>
               <span className="text-xs text-muted-foreground font-medium">
                 / campagne
@@ -391,7 +430,7 @@ export default function MainComponent() {
             type="submit"
             size="lg"
             className="w-full mt-6 bg-blue-900 hover:bg-blue-950 text-white font-medium rounded-xl h-12 text-base shadow-sm transition-all flex items-center justify-center gap-2"
-            disabled={loading}
+            disabled={loading || !audioFile || !companyName || !companyPhone}
           >
             <span>Lancer ma campagne</span>
             <Rocket className="h-4 w-4" />

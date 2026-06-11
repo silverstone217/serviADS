@@ -38,7 +38,7 @@ export default function Hero() {
 
           {/* BUTTONS */}
           <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-            <Link href={"/nouvelle-campagne"}>
+            <Link href={"/mon-espace"}>
               <Button size="lg" className="gap-2">
                 Créer ma campagne
                 <ArrowRight className="h-4 w-4" />

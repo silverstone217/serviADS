@@ -1,3 +1,4 @@
+import HeaderNav from "@/components/my-space/HeaderNav";
 import { Button } from "@/components/ui/button";
 import { inter } from "@/lib/fonts";
 import { Undo2 } from "lucide-react";
@@ -25,6 +26,11 @@ function MonEspaceLayout({ children }: MonEspaceLayoutProps) {
           </Button>
         </div>
       </header>
+
+      {/* SECOND HEADER */}
+      <div className="py-4">
+        <HeaderNav />
+      </div>
 
       <main>{children}</main>
     </div>

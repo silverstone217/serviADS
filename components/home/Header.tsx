@@ -42,7 +42,7 @@ const Header = () => {
         <div className="lg:flex items-center hidden gap-4">
           <Button variant={"link"}>Connexion</Button>
           <Button>
-            <Link href={"/nouvelle-campagne"}>Créer une campagne</Link>
+            <Link href={"/mon-espace"}>Créer une campagne</Link>
           </Button>
         </div>
 
