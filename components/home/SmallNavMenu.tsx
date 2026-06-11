@@ -38,7 +38,7 @@ const SmallNavMenu = () => {
           <SheetTitle className={`${inter.className} font-bold text-xl`}>
             SERVI <span className="text-primary">ADS.</span>
           </SheetTitle>
-          <SheetDescription>Votre plateforme preferee</SheetDescription>
+          <SheetDescription>Votre plateforme preferée</SheetDescription>
         </SheetHeader>
 
         <div className="py-8 border-y flex flex-col w-full px-4 flex-3/5 border-muted">
