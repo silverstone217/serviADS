@@ -1,6 +1,23 @@
 "use client";
+import {
+  AudioCampaign,
+  StatusAudioCampaign,
+} from "@/lib/generated/prisma/client";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Loader, Pencil } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { DATA_STATUS } from "@/utils/campaign";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,41 +30,51 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Loader, PlusCircle } from "lucide-react";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DATA_STATUS } from "@/utils/campaign";
-import { AudioDataType, newAudioCampaign } from "@/actions/campaign";
-import { toast } from "sonner";
-import { StatusAudioCampaign } from "@/lib/generated/prisma/enums";
+import { AudioDataModType, modifyAudioCampaign } from "@/actions/campaign";
 
-const NewCampaingForm = () => {
+interface ModifyCampaignProps {
+  audioCampaign: AudioCampaign;
+}
+
+const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const [campaignName, setCampaignName] = useState("");
-  const [duration, setDuration] = useState("2"); // per weeks
+  const [campaignName, setCampaignName] = useState(audioCampaign.name ?? "");
+  const [duration, setDuration] = useState(
+    audioCampaign.duration.toString() ?? "2",
+  ); // per weeks
 
-  const [costPerAudio, setCostPerAudio] = useState("2"); // in dollars USD
-  const [status, setStatus] = useState("en_cours");
+  const [costPerAudio, setCostPerAudio] = useState(
+    audioCampaign.costPerAudio.toString() ?? "2",
+  ); // in dollars USD
+  const [status, setStatus] = useState(audioCampaign.status ?? "en_cours");
 
   const isButtonDisabled = useMemo(() => {
     if (loading) return true;
     if (!campaignName || !duration || !costPerAudio) return true;
+    if (
+      campaignName === audioCampaign.name &&
+      Number(duration) === audioCampaign.duration &&
+      Number(costPerAudio) === audioCampaign.costPerAudio &&
+      status === audioCampaign.status
+    )
+      return true;
 
     return false;
-  }, [campaignName, costPerAudio, duration, loading]);
+  }, [
+    audioCampaign.costPerAudio,
+    audioCampaign.duration,
+    audioCampaign.name,
+    audioCampaign.status,
+    campaignName,
+    costPerAudio,
+    duration,
+    loading,
+    status,
+  ]);
 
-  //   handlesubmit
-
+  //   SUBMIT
   const handleSubmit = async () => {
     try {
       setLoading(true);
@@ -62,14 +89,15 @@ const NewCampaingForm = () => {
         return;
       }
 
-      const data: AudioDataType = {
+      const data: AudioDataModType = {
         costPerAudio: Number(costPerAudio),
         duration: Number(duration),
         name: campaignName.trim().toLocaleLowerCase(),
         status: status as StatusAudioCampaign,
+        id: audioCampaign.id,
       };
 
-      const result = await newAudioCampaign(data);
+      const result = await modifyAudioCampaign(data);
 
       if (result.error) {
         toast.error(result.message);
@@ -79,7 +107,7 @@ const NewCampaingForm = () => {
       toast.success(result.message);
       router.refresh();
     } catch (error) {
-      console.error("ERROR ON CREATE CAMP", error);
+      console.error("ERROR ON Modifying CAMP", error);
       toast.error("Impossible continuer sur cette action!");
     } finally {
       setLoading(false);
@@ -89,16 +117,21 @@ const NewCampaingForm = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="default" disabled={loading} className="px-6 w-full">
-          <PlusCircle size={20} /> Nouvelle campagne
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+          disabled={loading}
+        >
+          <Pencil className="h-3.5 w-3.5" />
+          Modifier
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent className="w-full">
         <AlertDialogHeader>
-          <AlertDialogTitle>Creation d&apos;une campagne</AlertDialogTitle>
+          <AlertDialogTitle>Modification de la campagne</AlertDialogTitle>
           <AlertDialogDescription>
-            Remplir les informations necessaires pour creer cette nouvelle
-            campagne.
+            Remplir les informations necessaires pour valider cette campagne.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -159,7 +192,10 @@ const NewCampaingForm = () => {
               Status
               <span className="text-destructive">*</span>
             </Label>
-            <Select value={status} onValueChange={setStatus}>
+            <Select
+              value={status}
+              onValueChange={(val) => setStatus(val as StatusAudioCampaign)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Status de la campagne" />
               </SelectTrigger>
@@ -181,7 +217,11 @@ const NewCampaingForm = () => {
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
           <AlertDialogAction disabled={isButtonDisabled} onClick={handleSubmit}>
-            {loading ? <Loader size={20} className="animate-spin" /> : "Creer"}
+            {loading ? (
+              <Loader size={20} className="animate-spin" />
+            ) : (
+              "Modifier"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -189,4 +229,4 @@ const NewCampaingForm = () => {
   );
 };
 
-export default NewCampaingForm;
+export default ModifyCampaign;

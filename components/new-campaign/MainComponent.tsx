@@ -14,14 +14,21 @@ import { Slider } from "../ui/slider";
 //   SelectValue,
 // } from "../ui/select";
 import { useRouter } from "next/navigation";
-import { UploadCloud, FileAudio, X, Rocket } from "lucide-react";
+import { UploadCloud, FileAudio, X, Rocket, Loader } from "lucide-react";
 import { useGetUser } from "@/hooks/user";
 import { toast } from "sonner";
 import AuthDialog from "./AuthDialog";
 import { AudioCampaign } from "@/lib/generated/prisma/client";
+import {
+  audioSubcriber,
+  AudioSubcribersType,
+  updateAudioSubscriberUrl,
+} from "@/actions/audioSubscrib";
+import { storage } from "@/lib/firebase";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
 type Props = {
-  audioCampaign: AudioCampaign | null;
+  audioCampaign: AudioCampaign;
 };
 
 export default function MainComponent({ audioCampaign }: Props) {
@@ -48,13 +55,14 @@ export default function MainComponent({ audioCampaign }: Props) {
 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Logique de calcul du résumé (Dynamique)
   // const daysInMonth = Number(campaignDuration) * 7; // Ajustable selon vos besoins business
   // const estimatedDiffusionsPerTaxiPerDay = 12;
 
   const [audioDuration, setAudioDuration] = useState(30); // Durée en secondes (Peut être calculée à partir du fichier audio)
-  const costPerAudio = audioCampaign ? audioCampaign.costPerAudio : 2;
+  const costPerAudio = audioCampaign.costPerAudio;
 
   const max_taxis = 5;
 
@@ -134,11 +142,76 @@ export default function MainComponent({ audioCampaign }: Props) {
       }
 
       // SEND TO DATABASE (CALL SERVER)
+      const data: AudioSubcribersType = {
+        audioCampaignId: audioCampaign.id,
+        audioDuration: audioDuration,
+        companyName: companyName.trim().toLowerCase(),
+        phoneClient: clientPhone.trim(),
+        price: totalprice,
+        taxiNumber,
+      };
+      const result = await audioSubcriber(data);
 
-      toast.success("No problem detected");
+      if (result.error) {
+        toast.error(result.message);
+        return;
+      }
+
+      const audioSubscribedId = result.audioSubscribedId;
+      if (!audioSubscribedId) {
+        toast.error("Un probleme est survenu!");
+        return;
+      }
+
+      //
+      toast.success(result.message);
 
       // SEND AUDIO FILE TO FIREBASE
+      const extension = audioFile.name.split(".").pop()?.toLowerCase() || "mp3";
+      const fileName = `${audioSubscribedId}.${extension}`;
+      const storageRef = ref(
+        storage,
+        `audio-campaigns/${audioCampaign.id}/${fileName}`,
+      );
+
+      const uploadTask = uploadBytesResumable(storageRef, audioFile);
+
+      const audioUrl = await new Promise<string>((resolve, reject) => {
+        uploadTask.on(
+          "state_changed",
+
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
+            setUploadProgress(Math.round(progress));
+          },
+
+          (error) => {
+            reject(error);
+          },
+
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+
+            resolve(downloadURL);
+          },
+        );
+      });
+
+      const resultAudio = await updateAudioSubscriberUrl(
+        audioSubscribedId,
+        audioUrl,
+      );
+
+      if (resultAudio.error) {
+        toast.error(resultAudio.message);
+        return;
+      }
+
+      toast.success("Votre souscription a ete enregistree!");
       router.refresh();
+      setTimeout(() => location.reload(), 1000);
     } catch (error) {
       console.log("SUBMIT AUDIO OFFER", error);
       toast.error("Une erreur est survenue, veuillez reessayez plus tard!");
@@ -190,6 +263,7 @@ export default function MainComponent({ audioCampaign }: Props) {
                       onChange={(e) => setCompanyName(e.target.value)}
                       placeholder="Ex : ServiAds"
                       disabled={loading}
+                      maxLength={60}
                     />
                   </div>
                   <div className="flex min-w-0 flex-col gap-2">
@@ -201,6 +275,8 @@ export default function MainComponent({ audioCampaign }: Props) {
                       onChange={(e) => setClientPhone(e.target.value)}
                       placeholder="0822550150"
                       disabled={loading}
+                      minLength={10}
+                      maxLength={10}
                     />
                   </div>
                 </div>
@@ -278,6 +354,7 @@ export default function MainComponent({ audioCampaign }: Props) {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
+                      disabled={loading}
                       className="flex flex-col items-center justify-center cursor-pointer focus:outline-none"
                     >
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-600">
@@ -311,6 +388,7 @@ export default function MainComponent({ audioCampaign }: Props) {
                         size="icon"
                         className="h-8 w-8 rounded-full text-muted-foreground hover:text-destructive"
                         onClick={() => setAudioFile(null)}
+                        disabled={loading}
                       >
                         <X className="h-4 w-4" />
                       </Button>
@@ -485,7 +563,15 @@ export default function MainComponent({ audioCampaign }: Props) {
             onClick={handleSubmit}
           >
             <span>Lancer ma campagne</span>
-            <Rocket className="h-4 w-4" />
+            {loading ? (
+              uploadProgress ? (
+                <p>{uploadProgress} %</p>
+              ) : (
+                <Loader size={20} className="animate-spin" />
+              )
+            ) : (
+              <Rocket className="h-4 w-4" />
+            )}
           </Button>
 
           {/* CONDITIONS */}

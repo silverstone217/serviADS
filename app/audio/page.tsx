@@ -28,7 +28,20 @@ async function page() {
         </p> */}
 
         {/* MAIN COMPONENT */}
-        <MainComponent audioCampaign={audioCampaign} />
+        {audioCampaign ? (
+          <MainComponent audioCampaign={audioCampaign} />
+        ) : (
+          <div
+            className="px-4 py-6 max-w-2xl w-full mx-auto text-muted-foreground bg-muted
+          rounded-lg
+          "
+          >
+            <p>
+              Pas de campagne disponible pour l&apos;instant, veuillez reessayer
+              plus tard
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

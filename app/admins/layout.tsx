@@ -1,3 +1,5 @@
+import { getUser } from "@/actions/user";
+import AdminAccessDenied from "@/components/admins/AdminAccessDenied";
 import Aside from "@/components/admins/Aside";
 import Header from "@/components/admins/Header";
 import React, { ReactNode } from "react";
@@ -6,7 +8,17 @@ interface LayoutProps {
   children: ReactNode;
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default async function Layout({ children }: LayoutProps) {
+  const user = await getUser();
+
+  if (!user) {
+    return <AdminAccessDenied type="unauthenticated" />;
+  }
+
+  if (user.role !== "ADMIN") {
+    return <AdminAccessDenied type="unauthorized" />;
+  }
+
   return (
     <>
       {/* Mobile Header */}

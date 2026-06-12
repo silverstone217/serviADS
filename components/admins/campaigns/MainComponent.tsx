@@ -9,7 +9,6 @@ import {
 import {
   Search,
   SlidersHorizontal,
-  Pencil,
   Trash2,
   Calendar,
   DollarSign,
@@ -34,6 +33,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import ModifyCampaign from "./ModifyCampaign";
+import { deleteAudioCampaignById } from "@/actions/campaign";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface AudioMainComponentProps {
   audioCampaigns: AudioCampaign[];
@@ -42,6 +45,9 @@ interface AudioMainComponentProps {
 const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
   const [status, setStatus] = useState<string>("all");
   const [searchText, setSearchText] = useState<string>("");
+
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
 
   // Filtrage optimisé et insensible à la casse
   const filteredCampaigns = useMemo(() => {
@@ -103,12 +109,28 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
     }).format(amount);
   };
 
-  const handleEdit = (id: string) => {
-    console.log("Modifier la campagne :", id);
-  };
+  // const handleEdit = (id: string) => {
+  //   console.log("Modifier la campagne :", id);
+  // };
 
-  const handleDelete = (id: string) => {
-    console.log("Supprimer la campagne :", id);
+  const handleDelete = async (id: string) => {
+    try {
+      setLoading(true);
+
+      const result = await deleteAudioCampaignById(id);
+      if (result.error) {
+        toast.error(result.message);
+        return;
+      }
+
+      toast.success(result.message);
+      router.refresh();
+    } catch (error) {
+      console.error("ERROR ON deleting CAMP", error);
+      toast.error("Impossible continuer sur cette action!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -209,20 +231,13 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
 
               {/* Footer Card : Actions */}
               <CardFooter className="bg-muted/30 px-6 py-3 border-t flex justify-end items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleEdit(camp.id)}
-                  className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
-                >
-                  <Pencil className="h-3.5 w-3.5" />
-                  Modifier
-                </Button>
+                <ModifyCampaign audioCampaign={camp} />
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => handleDelete(camp.id)}
                   className="h-8 text-xs gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  disabled={loading}
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Supprimer
