@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -12,15 +12,35 @@ import {
 import Link from "next/link";
 import { HOME_LINKS } from "@/utils/links";
 import { inter } from "@/lib/fonts";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useGetUser } from "@/hooks/user";
 import UserAvatar from "../UserAvatar";
 import AuthComponent from "../auth/AuthComponent";
 import { Button } from "../ui/button";
+import { signOut } from "next-auth/react";
+import { toast } from "sonner";
 
 const SmallNavMenu = () => {
   const pathname = usePathname();
   const { user } = useGetUser();
+
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleLogOut = async () => {
+    try {
+      setLoading(true);
+      await signOut({ redirect: false }); // Évite les rechargements brutaux du navigateur
+      toast.success("Vous avez été déconnecté avec succès !");
+      router.refresh();
+      location.reload();
+    } catch (error) {
+      console.error("ERREUR_DECONNEXION:", error);
+      toast.error("Une erreur s'est produite, impossible de vous déconnecter.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Sheet>
@@ -73,7 +93,12 @@ const SmallNavMenu = () => {
                 </div>
               </Link>
 
-              <Button variant={"destructive"} className="w-full">
+              <Button
+                variant={"destructive"}
+                className="w-full"
+                disabled={loading}
+                onClick={handleLogOut}
+              >
                 Deconnexion
               </Button>
             </div>

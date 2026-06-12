@@ -6,23 +6,28 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "../ui/select";
 import { useRouter } from "next/navigation";
 import { UploadCloud, FileAudio, X, Rocket } from "lucide-react";
 import { useGetUser } from "@/hooks/user";
 import { toast } from "sonner";
 import AuthDialog from "./AuthDialog";
+import { AudioCampaign } from "@/lib/generated/prisma/client";
 
-export default function MainComponent() {
+type Props = {
+  audioCampaign: AudioCampaign | null;
+};
+
+export default function MainComponent({ audioCampaign }: Props) {
   const [companyName, setCompanyName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
-  const [campaignName, setCampaignName] = useState("juillet-2026");
+  // const [campaignName, setCampaignName] = useState("juillet-2026");
 
   const [openAuthDialog, setOpenAuthDialog] = useState(false);
   const { user } = useGetUser();
@@ -33,26 +38,31 @@ export default function MainComponent() {
 
   // Étape 3 States (Synchronisés sur les valeurs de l'image)
   const [taxiNumber, setTaxiNumber] = useState<number>(2);
-  const [zone, setZone] = useState("kinshasa");
-  const [campaignDuration, setCampaignDuration] = useState("2"); // 2 semaines
+  // const [zone, setZone] = useState("kinshasa");
+  // const [campaignDuration, setCampaignDuration] = useState("2"); // 2 semaines
+
+  // const campaignDuration = audioCampaign
+  //   ? audioCampaign.duration.toString()
+  //   : "2";
+  // const campaignName = audioCampaign?.name
 
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   // Logique de calcul du résumé (Dynamique)
-  const daysInMonth = Number(campaignDuration) * 7; // Ajustable selon vos besoins business
-  const estimatedDiffusionsPerTaxiPerDay = 12;
+  // const daysInMonth = Number(campaignDuration) * 7; // Ajustable selon vos besoins business
+  // const estimatedDiffusionsPerTaxiPerDay = 12;
 
   const [audioDuration, setAudioDuration] = useState(30); // Durée en secondes (Peut être calculée à partir du fichier audio)
-  const costPerAudio = 2;
+  const costPerAudio = audioCampaign ? audioCampaign.costPerAudio : 2;
 
   const max_taxis = 5;
 
-  const totalDiffusions =
-    taxiNumber *
-    estimatedDiffusionsPerTaxiPerDay *
-    daysInMonth *
-    Number(campaignDuration);
+  // const totalDiffusions =
+  //   taxiNumber *
+  //   estimatedDiffusionsPerTaxiPerDay *
+  //   daysInMonth *
+  //   Number(campaignDuration);
 
   // Drag & Drop Handlers
   const handleDrag = (e: React.DragEvent) => {
@@ -128,6 +138,7 @@ export default function MainComponent() {
       toast.success("No problem detected");
 
       // SEND AUDIO FILE TO FIREBASE
+      router.refresh();
     } catch (error) {
       console.log("SUBMIT AUDIO OFFER", error);
       toast.error("Une erreur est survenue, veuillez reessayez plus tard!");

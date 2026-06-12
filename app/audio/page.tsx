@@ -1,8 +1,11 @@
+import { getCurrentAudioCampaign } from "@/actions/campaign";
 import MainComponent from "@/components/new-campaign/MainComponent";
 import { inter } from "@/lib/fonts";
 import React from "react";
 
-function page() {
+async function page() {
+  const audioCampaign = await getCurrentAudioCampaign();
+
   return (
     <div className="container mx-auto px-4 md:px-6 xl:px-8 pb-8 pt-4">
       {/* MAIN */}
@@ -12,13 +15,20 @@ function page() {
         <h1 className={`text-3xl font-bold ${inter.className} `}>
           Créer une Publicite audio
         </h1>
+        {audioCampaign && (
+          <span
+            className={`line-clamp-1 capitalize text-xl font-bold ${inter.className} text-muted-foreground`}
+          >
+            {audioCampaign.name}
+          </span>
+        )}
         {/* <p className="text-muted-foreground max-w-2xl">
           Configurez votre campagne publicitaire pour le réseau de transport
           urbain. Suivez les étapes pour définir votre audience et votre budget.
         </p> */}
 
         {/* MAIN COMPONENT */}
-        <MainComponent />
+        <MainComponent audioCampaign={audioCampaign} />
       </main>
     </div>
   );

@@ -26,9 +26,23 @@ export const newAudioCampaign = async (data: AudioDataType) => {
 
     // CHECK ROLE
 
+    // CHECK IF THERE'S CURRENT AUDIO CAMP
+    const isAcampaignExist = await prisma.audioCampaign.findFirst({
+      where: {
+        status: "en_cours",
+      },
+    });
+
+    if (isAcampaignExist && data.status === "en_cours") {
+      return {
+        message:
+          "Une campagne a deja un status en cours, terminez la, avant de lancer une autre!",
+        error: true,
+      };
+    }
+
     // CREATE CAMPAIGN
     //const newCamp =
-
     await prisma.audioCampaign.create({
       data: {
         ...data,
@@ -55,5 +69,17 @@ export const getAllAudioCampaings = async () => {
     },
   });
 
-  return camps ?? [];
+  return camps || [];
+};
+
+// GET CURRENT AUDIO CAMPAIGN
+export const getCurrentAudioCampaign = async () => {
+  return prisma.audioCampaign.findFirst({
+    where: {
+      status: "en_cours",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 };
