@@ -106,3 +106,15 @@ export const updateAudioSubscriberUrl = async (
     };
   }
 };
+
+// GET ALL AUDIO SUBSCRIBERS
+export const getAllAudiSubscribers = async () => {
+  const user = await getUser();
+
+  if (!user) return [];
+  const subs = await prisma.audioSubscriber.findMany({
+    where: { subscriberId: user.id },
+    orderBy: { createdAt: "desc" },
+  });
+  return subs || [];
+};
