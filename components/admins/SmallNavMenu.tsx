@@ -10,7 +10,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import Link from "next/link";
-import { HOME_LINKS } from "@/utils/links";
+import { ADMINS_LINKS } from "@/utils/links";
 import { inter } from "@/lib/fonts";
 import { usePathname } from "next/navigation";
 import { useGetUser } from "@/hooks/user";
@@ -42,7 +42,7 @@ const SmallNavMenu = () => {
         </SheetHeader>
 
         <div className="py-8 border-y flex flex-col w-full px-4 flex-3/5 border-muted gap-2">
-          {HOME_LINKS.map((link) => {
+          {ADMINS_LINKS.map((link) => {
             const isPathname = link.href === pathname;
             return (
               <SheetClose key={link.name} asChild>

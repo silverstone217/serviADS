@@ -74,5 +74,51 @@ model User {
   accounts Account[]
   sessions Session[]
 
+  audioSubscribers AudioSubscriber[]
+
   @@map("users")
+}
+
+enum StatusAudioCampaign {
+  en_cours
+  terminee
+  en_pause
+}
+
+model AudioCampaign {
+  id String @id @default(cuid())
+
+  name   String
+  status StatusAudioCampaign @default(en_cours)
+
+  duration     Float @default(2)
+  costPerAudio Float @default(2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  audioSubscribers AudioSubscriber[]
+}
+
+model AudioSubscriber {
+  id              String @id @default(cuid())
+  audioCampaignId String
+  subscriberId    String
+
+  audioFile     String? //url from firebase
+  audioDuration Float // in seconds
+
+  zone       String @default("kinshasa")
+  taxiNumber Int    @default(1)
+
+  companyName String?
+  clientPhone String
+
+  price Float @default(2)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  subscriber    User          @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  audioCampaign AudioCampaign @relation(fields: [audioCampaignId], references: [id], onDelete: Cascade)
 }

@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { useRouter } from "next/navigation";
-import { UploadCloud, HelpCircle, FileAudio, X, Rocket } from "lucide-react";
+import { UploadCloud, FileAudio, X, Rocket } from "lucide-react";
 import { useGetUser } from "@/hooks/user";
 import { toast } from "sonner";
 import AuthDialog from "./AuthDialog";
@@ -137,7 +137,7 @@ export default function MainComponent() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl py-10">
+    <div className="mx-auto max-w-6xl pb-10 pt-4">
       {/* GRILLE PRINCIPALE DEUX COLONNES */}
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 items-start">
         {/* COLONNE GAUCHE : FORMULAIRES (Prend 2 colonnes sur 3) */}
@@ -161,10 +161,10 @@ export default function MainComponent() {
                   >
                     Informations de l&apos;entreprise
                   </h2>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  {/* <p className="mt-2 text-sm text-muted-foreground">
                     Détails de base pour la facturation et l&apos;identification
                     de la campagne.
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -194,7 +194,7 @@ export default function MainComponent() {
                   </div>
                 </div>
 
-                <div className="flex min-w-0 flex-col gap-2">
+                {/* <div className="flex min-w-0 flex-col gap-2">
                   <Label htmlFor="campaignName">Nom de la campagne</Label>
                   <Input
                     id="campaignName"
@@ -203,7 +203,7 @@ export default function MainComponent() {
                     disabled
                     className="w-full"
                   />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -231,14 +231,14 @@ export default function MainComponent() {
                       Importez votre spot publicitaire au format MP3 ou WAV.
                     </p>
                   </div>
-                  <button
+                  {/* <button
                     type="button"
                     className="flex items-center gap-2 rounded-full border border-emerald-200/60 
                     bg-emerald-50/50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition-colors hover:bg-emerald-50"
                   >
                     <HelpCircle className="h-4 w-4 text-emerald-600" />
                     <span>Besoin d&apos;aide ?</span>
-                  </button>
+                  </button> */}
                 </div>
 
                 <div
@@ -328,10 +328,10 @@ export default function MainComponent() {
                   >
                     Paramètres de diffusion
                   </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  {/* <p className="mt-1 text-sm text-muted-foreground">
                     Définissez où, quand et comment votre publicité sera
                     diffusée.
-                  </p>
+                  </p> */}
                 </div>
 
                 <div className="flex flex-col gap-4">
@@ -355,7 +355,7 @@ export default function MainComponent() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                {/* <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="flex flex-col gap-2">
                     <Label className="text-xs font-mono tracking-wider uppercase text-muted-foreground">
                       Zone Géographique
@@ -394,7 +394,7 @@ export default function MainComponent() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -419,14 +419,14 @@ export default function MainComponent() {
               </span>
             </div>
 
-            <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
               <span className="text-muted-foreground">
                 Durée de la campagne
               </span>
               <span className="font-semibold text-foreground">
                 {campaignDuration} semaine{campaignDuration > "1" && "s"}
               </span>
-            </div>
+            </div> */}
 
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Durée d&apos;audio</span>
@@ -436,18 +436,18 @@ export default function MainComponent() {
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Coût par taxi/jour</span>
+              <span className="text-muted-foreground">Coût par taxi/duree</span>
               <span className="font-semibold text-foreground">
                 ${costPerAudio.toFixed(2)}
               </span>
             </div>
 
-            <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Diffusions estimées</span>
               <span className="font-semibold text-blue-600">
                 ~{totalDiffusions.toLocaleString()}
               </span>
-            </div>
+            </div> */}
           </div>
 
           {/* TOTAL ESTIMÉ BLOC */}

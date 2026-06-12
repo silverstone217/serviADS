@@ -12,10 +12,10 @@ function page() {
         <h1 className={`text-3xl font-bold ${inter.className} `}>
           Créer une Publicite audio
         </h1>
-        <p className="text-muted-foreground max-w-2xl">
+        {/* <p className="text-muted-foreground max-w-2xl">
           Configurez votre campagne publicitaire pour le réseau de transport
           urbain. Suivez les étapes pour définir votre audience et votre budget.
-        </p>
+        </p> */}
 
         {/* MAIN COMPONENT */}
         <MainComponent />

@@ -25,7 +25,9 @@ async function MonEspaceLayout({ children }: MonEspaceLayoutProps) {
           >
             <Undo2 />
           </Link>
-          <h2 className={`text-xl font-bold ${inter.className}`}>Mon Espace</h2>
+          <h2 className={`text-xl font-bold ${inter.className}`}>
+            Diff. Audio
+          </h2>
           <div>{user ? <PopOverProfile /> : <AuthComponent />}</div>
         </div>
       </header>

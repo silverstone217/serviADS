@@ -8,8 +8,8 @@ const links = [
 ];
 
 const platformLinks = [
-  { name: "Mon Espace", href: "/mon-espace" },
-  { name: "Administration", href: "/admin" },
+  { name: "Diffusion Audio", href: "/audio" },
+  { name: "Administration", href: "/admins" },
 ];
 
 export function Footer() {
