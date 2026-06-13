@@ -1,18 +1,11 @@
 "use client";
 
 import { inter } from "@/lib/fonts";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectItem,
-//   SelectTrigger,
-//   SelectValue,
-// } from "../ui/select";
 import { useRouter } from "next/navigation";
 import { UploadCloud, FileAudio, X, Rocket, Loader } from "lucide-react";
 import { useGetUser } from "@/hooks/user";
@@ -26,12 +19,21 @@ import {
 } from "@/actions/audioSubscrib";
 import { storage } from "@/lib/firebase";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 type Props = {
-  audioCampaign: AudioCampaign;
+  audioCampaigns: AudioCampaign[];
 };
 
-export default function MainComponent({ audioCampaign }: Props) {
+export default function MainComponent({ audioCampaigns }: Props) {
+  const [audioCampaignId, setAudioCampaignId] = useState(audioCampaigns[0].id);
+
   const [companyName, setCompanyName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   // const [campaignName, setCampaignName] = useState("juillet-2026");
@@ -61,8 +63,15 @@ export default function MainComponent({ audioCampaign }: Props) {
   // const daysInMonth = Number(campaignDuration) * 7; // Ajustable selon vos besoins business
   // const estimatedDiffusionsPerTaxiPerDay = 12;
 
+  const audioCampaign = useMemo(
+    () => audioCampaigns.find((camp) => camp.id === audioCampaignId),
+    [audioCampaignId, audioCampaigns],
+  );
+
   const [audioDuration, setAudioDuration] = useState(30); // Durée en secondes (Peut être calculée à partir du fichier audio)
-  const costPerAudio = audioCampaign.costPerAudio;
+  const costPerAudio = audioCampaign
+    ? audioCampaign.costPerAudio
+    : audioCampaigns[0].costPerAudio;
 
   const max_taxis = 5;
 
@@ -137,13 +146,13 @@ export default function MainComponent({ audioCampaign }: Props) {
 
       // NO INPUT
       if (!companyName || !clientPhone) {
-        toast.error("Veuillez remplir tous les champs avant de validerr");
+        toast.error("Veuillez remplir tous les champs avant de valider");
         return;
       }
 
       // SEND TO DATABASE (CALL SERVER)
       const data: AudioSubcribersType = {
-        audioCampaignId: audioCampaign.id,
+        audioCampaignId: audioCampaignId,
         audioDuration: audioDuration,
         companyName: companyName.trim().toLowerCase(),
         phoneClient: clientPhone.trim(),
@@ -171,7 +180,7 @@ export default function MainComponent({ audioCampaign }: Props) {
       const fileName = `${audioSubscribedId}.${extension}`;
       const storageRef = ref(
         storage,
-        `audio-campaigns/${audioCampaign.id}/${fileName}`,
+        `audio-campaigns/${audioCampaignId}/${fileName}`,
       );
 
       const uploadTask = uploadBytesResumable(storageRef, audioFile);
@@ -281,16 +290,30 @@ export default function MainComponent({ audioCampaign }: Props) {
                   </div>
                 </div>
 
-                {/* <div className="flex min-w-0 flex-col gap-2">
+                <div className="flex min-w-0 flex-col gap-2">
                   <Label htmlFor="campaignName">Nom de la campagne</Label>
-                  <Input
-                    id="campaignName"
-                    type="text"
-                    value={campaignName}
-                    disabled
-                    className="w-full"
-                  />
-                </div> */}
+                  <Select
+                    value={audioCampaignId}
+                    onValueChange={(val) => setAudioCampaignId(val)}
+                  >
+                    <SelectTrigger className="w-full bg-background">
+                      <SelectValue placeholder="Sélectionnez une campagne" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {audioCampaigns.map((camp) => {
+                        return (
+                          <SelectItem
+                            value={camp.id}
+                            key={camp.id}
+                            className="capitalize"
+                          >
+                            {camp.name}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
           </div>
@@ -508,21 +531,32 @@ export default function MainComponent({ audioCampaign }: Props) {
               </span>
             </div>
 
-            {/* <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">
-                Durée de la campagne
-              </span>
-              <span className="font-semibold text-foreground">
-                {campaignDuration} semaine{campaignDuration > "1" && "s"}
-              </span>
-            </div> */}
-
+            {audioCampaign && (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">
+                  Durée de la campagne
+                </span>
+                <span className="font-semibold text-foreground">
+                  {audioCampaign?.duration} semaine
+                  {audioCampaign?.duration.toString() > "1" && "s"}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Durée d&apos;audio</span>
               <span className="font-semibold text-foreground">
                 {audioDuration} secondes
               </span>
             </div>
+
+            {audioCampaign && (
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground">Date de debut</span>
+                <span className="font-semibold text-foreground">
+                  {new Date(audioCampaign.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            )}
 
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Coût par taxi/duree</span>

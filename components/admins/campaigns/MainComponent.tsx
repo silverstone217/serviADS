@@ -2,10 +2,7 @@
 
 import React, { useMemo, useState } from "react";
 import NewCampaingForm from "./NewCampaingForm";
-import {
-  AudioCampaign,
-  StatusAudioCampaign,
-} from "@/lib/generated/prisma/client";
+import { AudioCampaign } from "@/lib/generated/prisma/client";
 import {
   Search,
   SlidersHorizontal,
@@ -37,6 +34,8 @@ import ModifyCampaign from "./ModifyCampaign";
 import { deleteAudioCampaignById } from "@/actions/campaign";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { CampaignStatus } from "@/types/campaign";
+import { getCampaignStatus } from "@/utils/campaign";
 
 interface AudioMainComponentProps {
   audioCampaigns: AudioCampaign[];
@@ -56,25 +55,27 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
         camp.name.toLowerCase().includes(searchText.toLowerCase().trim()),
       )
       .filter((camp) =>
-        status && status !== "all" ? camp.status === status : true,
+        status !== "all" ? getCampaignStatus(camp) === status : true,
       );
   }, [audioCampaigns, searchText, status]);
 
   // Configuration des styles de badges selon le statut
   const BADGE_CONFIG: Record<
-    StatusAudioCampaign,
+    CampaignStatus,
     { label: string; className: string }
   > = {
+    enregistrement: {
+      label: "Pré-enregistrement",
+      className:
+        "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-400 dark:border-violet-800",
+    },
+
     en_cours: {
-      label: "En cours",
+      label: "En diffusion",
       className:
         "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800",
     },
-    en_pause: {
-      label: "En pause",
-      className:
-        "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800",
-    },
+
     terminee: {
       label: "Terminée",
       className:
@@ -82,17 +83,10 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
     },
   };
 
-  const getStatusBadge = (status: StatusAudioCampaign) => {
-    const config = BADGE_CONFIG[status];
+  const getStatusBadge = (campaign: AudioCampaign) => {
+    const status = getCampaignStatus(campaign);
 
-    // Sécurité si jamais un statut inconnu arrive
-    if (!config) {
-      return (
-        <Badge variant="outline" className="capitalize">
-          {status.replace("_", " ")}
-        </Badge>
-      );
-    }
+    const config = BADGE_CONFIG[status];
 
     return (
       <Badge variant="outline" className={config.className}>
@@ -164,8 +158,13 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="en_cours">En cours</SelectItem>
-                <SelectItem value="en_pause">En pause</SelectItem>
+
+                <SelectItem value="enregistrement">
+                  Pré-enregistrement
+                </SelectItem>
+
+                <SelectItem value="en_cours">En diffusion</SelectItem>
+
                 <SelectItem value="terminee">Terminée</SelectItem>
               </SelectContent>
             </Select>
@@ -201,7 +200,7 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
                 >
                   {camp.name}
                 </CardTitle>
-                <div className="shrink-0">{getStatusBadge(camp.status)}</div>
+                <div className="shrink-0">{getStatusBadge(camp)}</div>
               </CardHeader>
 
               <hr className="mx-6 border-border" />
@@ -219,13 +218,23 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
                   </div>
                 </div>
 
-                {/* Date de création */}
-                <div className="flex items-center gap-2 text-xs text-muted-foreground/80 pt-1">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>
-                    Créé le{" "}
-                    {new Date(camp.createdAt).toLocaleDateString("fr-FR")}
-                  </span>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  {/* Date de création */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/80 pt-1">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span>
+                      Créé le{" "}
+                      {new Date(camp.createdAt).toLocaleDateString("fr-FR")}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span>
+                      Début :{" "}
+                      {new Date(camp.startDate).toLocaleDateString("fr-FR")}
+                    </span>
+                  </div>
                 </div>
               </CardContent>
 

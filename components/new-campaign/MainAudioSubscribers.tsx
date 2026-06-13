@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { AudioSubscriber } from "@/lib/generated/prisma/client";
+import { AudioCampaign, AudioSubscriber } from "@/lib/generated/prisma/client";
 import {
   Search,
   SlidersHorizontal,
@@ -14,7 +14,6 @@ import {
   User,
   Music4,
 } from "lucide-react";
-
 import { Input } from "@/components/ui/input";
 import {
   Card,
@@ -33,9 +32,32 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
+type AudioSubscriberWithCamp = AudioSubscriber & {
+  audioCampaign: AudioCampaign;
+};
+
 interface Props {
-  audioSubscribers: AudioSubscriber[];
+  audioSubscribers: AudioSubscriberWithCamp[];
 }
+
+const getCampaignStatus = (startDate: Date, durationWeeks: number) => {
+  const now = new Date();
+
+  const start = new Date(startDate);
+
+  const end = new Date(start);
+  end.setDate(start.getDate() + durationWeeks * 7);
+
+  if (now < start) {
+    return "UPCOMING";
+  }
+
+  if (now >= start && now <= end) {
+    return "ONGOING";
+  }
+
+  return "FINISHED";
+};
 
 export default function MainAudioSubscribers({ audioSubscribers }: Props) {
   const [search, setSearch] = useState("");
@@ -213,16 +235,48 @@ export default function MainAudioSubscribers({ audioSubscribers }: Props) {
                 </div>
 
                 {/* DATE EN BAS DE CONTENU */}
-                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground/80 pl-0.5">
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground/60" />
-                  <span>
-                    Inscrit le{" "}
-                    {new Date(sub.createdAt).toLocaleDateString("fr-FR", {
-                      day: "numeric",
-                      month: "short",
-                      year: "numeric",
-                    })}
-                  </span>
+                {/* DATE EN BAS DE CONTENU */}
+                <div className="flex items-center gap-1.5 text-[11px] pl-0.5">
+                  <Calendar className="h-3.5 w-3.5" />
+
+                  {(() => {
+                    const startDate = new Date(sub.audioCampaign.startDate);
+                    const status = getCampaignStatus(
+                      startDate,
+                      sub.audioCampaign.duration,
+                    );
+
+                    const formattedDate = startDate.toLocaleDateString(
+                      "fr-FR",
+                      {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      },
+                    );
+
+                    if (status === "UPCOMING") {
+                      return (
+                        <span className="text-blue-500">
+                          Commence le {formattedDate}
+                        </span>
+                      );
+                    }
+
+                    if (status === "ONGOING") {
+                      return (
+                        <span className="text-green-500 font-medium">
+                          A débuté / en cours depuis le {formattedDate}
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <span className="text-muted-foreground/80">
+                        A débuté le {formattedDate}
+                      </span>
+                    );
+                  })()}
                 </div>
               </CardContent>
 

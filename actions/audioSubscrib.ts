@@ -115,6 +115,9 @@ export const getAllAudiSubscribers = async () => {
   const subs = await prisma.audioSubscriber.findMany({
     where: { subscriberId: user.id },
     orderBy: { createdAt: "desc" },
+    include: {
+      audioCampaign: true,
+    },
   });
   return subs || [];
 };

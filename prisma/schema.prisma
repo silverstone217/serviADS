@@ -88,11 +88,12 @@ enum StatusAudioCampaign {
 model AudioCampaign {
   id String @id @default(cuid())
 
-  name   String
-  status StatusAudioCampaign @default(en_cours)
+  name      String
+  // status StatusAudioCampaign @default(en_cours)
+  startDate DateTime @default(now()) @map("start_date")
 
-  duration     Float @default(2)
-  costPerAudio Float @default(2)
+  duration     Float @default(2) //week
+  costPerAudio Float @default(2) // usd dollars
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -1,7 +1,7 @@
 "use client";
 import {
   AudioCampaign,
-  StatusAudioCampaign,
+  // StatusAudioCampaign,
 } from "@/lib/generated/prisma/client";
 import { useRouter } from "next/navigation";
 import React, { useMemo, useState } from "react";
@@ -9,15 +9,15 @@ import { toast } from "sonner";
 import { Loader, Pencil } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DATA_STATUS } from "@/utils/campaign";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { DATA_STATUS } from "@/utils/campaign";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,7 +48,10 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
   const [costPerAudio, setCostPerAudio] = useState(
     audioCampaign.costPerAudio.toString() ?? "2",
   ); // in dollars USD
-  const [status, setStatus] = useState(audioCampaign.status ?? "en_cours");
+  // const [status, setStatus] = useState(audioCampaign.status ?? "en_cours");
+  const [startDate, setStartDate] = useState(
+    new Date(audioCampaign.startDate).toISOString().slice(0, 16),
+  );
 
   const isButtonDisabled = useMemo(() => {
     if (loading) return true;
@@ -57,7 +60,8 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
       campaignName === audioCampaign.name &&
       Number(duration) === audioCampaign.duration &&
       Number(costPerAudio) === audioCampaign.costPerAudio &&
-      status === audioCampaign.status
+      new Date(startDate).getTime() ===
+        new Date(audioCampaign.startDate).getTime()
     )
       return true;
 
@@ -66,12 +70,12 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
     audioCampaign.costPerAudio,
     audioCampaign.duration,
     audioCampaign.name,
-    audioCampaign.status,
+    audioCampaign.startDate,
     campaignName,
     costPerAudio,
     duration,
     loading,
-    status,
+    startDate,
   ]);
 
   //   SUBMIT
@@ -92,8 +96,8 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
       const data: AudioDataModType = {
         costPerAudio: Number(costPerAudio),
         duration: Number(duration),
-        name: campaignName.trim().toLocaleLowerCase(),
-        status: status as StatusAudioCampaign,
+        name: campaignName.trim().toLowerCase(),
+        startDate: new Date(startDate),
         id: audioCampaign.id,
       };
 
@@ -187,7 +191,7 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
           </div>
 
           {/* STATUS  */}
-          <div className="w-full grid gap-2">
+          {/* <div className="w-full grid gap-2">
             <Label htmlFor="status">
               Status
               <span className="text-destructive">*</span>
@@ -211,6 +215,21 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
                 </SelectGroup>
               </SelectContent>
             </Select>
+          </div> */}
+
+          {/* START DATE */}
+          <div className="w-full grid gap-2">
+            <Label htmlFor="startDate">
+              Début de la campagne
+              <span className="text-destructive">*</span>
+            </Label>
+
+            <Input
+              id="startDate"
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
           </div>
         </div>
 

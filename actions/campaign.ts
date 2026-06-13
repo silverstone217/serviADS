@@ -2,13 +2,12 @@
 
 import prisma from "@/lib/prisma";
 import { getUser } from "./user";
-import { StatusAudioCampaign } from "@/lib/generated/prisma/enums";
 
 export type AudioDataType = {
   name: string;
   duration: number;
   costPerAudio: number;
-  status: StatusAudioCampaign;
+  startDate: Date;
 };
 
 // CREATE AUDIO CAMPAIGN AS ADMIN
@@ -16,47 +15,49 @@ export const newAudioCampaign = async (data: AudioDataType) => {
   try {
     const user = await getUser();
 
-    // IF USER CAN ACCCES !
+    // CHECK ACCESS
     if (!user || user.isBanned || user.role !== "ADMIN") {
       return {
-        message: "Acces refuse!",
+        message: "Accès refusé !",
         error: true,
       };
     }
 
-    // CHECK ROLE
-
-    // CHECK IF THERE'S CURRENT AUDIO CAMP
-    const isAcampaignExist = await prisma.audioCampaign.findFirst({
+    // CHECK DUPLICATE CAMPAIGN
+    const isCampaignExist = await prisma.audioCampaign.findFirst({
       where: {
-        status: "en_cours",
+        startDate: data.startDate,
+        duration: data.duration,
       },
     });
 
-    if (isAcampaignExist && data.status === "en_cours") {
+    if (isCampaignExist) {
       return {
         message:
-          "Une campagne a deja un status en cours, terminez la, avant de lancer une autre!",
+          "Une campagne avec cette date de démarrage et cette durée existe déjà.",
         error: true,
       };
     }
 
     // CREATE CAMPAIGN
-    //const newCamp =
     await prisma.audioCampaign.create({
       data: {
-        ...data,
+        name: data.name,
+        startDate: data.startDate,
+        duration: data.duration,
+        costPerAudio: data.costPerAudio,
       },
     });
 
     return {
-      message: "Nouvelle campagne creee!",
+      message: "Nouvelle campagne créée avec succès !",
       error: false,
     };
   } catch (error) {
     console.error("ERROR ON CAMPAIGN", error);
+
     return {
-      message: "Oops impossible de creer!",
+      message: "Oops, impossible de créer la campagne !",
       error: true,
     };
   }
@@ -72,24 +73,33 @@ export const getAllAudioCampaings = async () => {
   return camps || [];
 };
 
-// GET CURRENT AUDIO CAMPAIGN
-export const getCurrentAudioCampaign = async () => {
-  return prisma.audioCampaign.findFirst({
+// GET CURRENT AUDIO CAMPAIGNS
+// GET FUTURE AUDIO CAMPAIGNS (FROM TOMORROW ONLY)
+export const getCurrentAudioCampaigns = async () => {
+  const now = new Date();
+
+  const tomorrow = new Date(now);
+  tomorrow.setDate(now.getDate() + 1);
+  tomorrow.setHours(0, 0, 0, 0); // important : début de journée
+
+  return prisma.audioCampaign.findMany({
     where: {
-      status: "en_cours",
+      startDate: {
+        gte: tomorrow,
+      },
     },
     orderBy: {
-      createdAt: "desc",
+      startDate: "asc",
     },
   });
 };
 
 export type AudioDataModType = {
+  id: string;
   name: string;
   duration: number;
   costPerAudio: number;
-  status: StatusAudioCampaign;
-  id: string;
+  startDate: Date;
 };
 
 // CREATE AUDIO CAMPAIGN AS ADMIN
@@ -97,7 +107,6 @@ export const modifyAudioCampaign = async (data: AudioDataModType) => {
   try {
     const user = await getUser();
 
-    // IF USER CAN ACCCES !
     if (!user || user.isBanned || user.role !== "ADMIN") {
       return {
         message: "Acces refuse!",
@@ -105,45 +114,46 @@ export const modifyAudioCampaign = async (data: AudioDataModType) => {
       };
     }
 
-    // CHECK ROLE
-
-    // CHECK IF THERE'S CURRENT AUDIO CAMP
+    // Vérifier qu'une campagne identique n'existe pas déjà
     const isAcampaignExist = await prisma.audioCampaign.findFirst({
       where: {
-        status: "en_cours",
         id: {
           not: data.id,
         },
+        startDate: data.startDate,
+        duration: data.duration,
       },
     });
 
-    if (isAcampaignExist && data.status === "en_cours") {
+    if (isAcampaignExist) {
       return {
         message:
-          "Une campagne a deja un status en cours, terminez la, avant de lancer une autre!",
+          "Une campagne avec cette date de démarrage et cette durée existe déjà.",
         error: true,
       };
     }
 
-    // MODIFY CAMPAIGN
-    //const newCamp =
     await prisma.audioCampaign.update({
       where: {
         id: data.id,
       },
       data: {
-        ...data,
+        name: data.name,
+        duration: data.duration,
+        costPerAudio: data.costPerAudio,
+        startDate: data.startDate,
       },
     });
 
     return {
-      message: "Campagne modifiee avec succes!",
+      message: "Campagne modifiée avec succès !",
       error: false,
     };
   } catch (error) {
     console.error("ERROR ON CAMPAIGN", error);
+
     return {
-      message: "Oops impossible de modifier!",
+      message: "Oops impossible de modifier !",
       error: true,
     };
   }

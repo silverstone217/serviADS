@@ -16,18 +16,18 @@ import { Button } from "@/components/ui/button";
 import { Loader, PlusCircle } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { DATA_STATUS } from "@/utils/campaign";
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
+// import { DATA_STATUS } from "@/utils/campaign";
 import { AudioDataType, newAudioCampaign } from "@/actions/campaign";
 import { toast } from "sonner";
-import { StatusAudioCampaign } from "@/lib/generated/prisma/enums";
+// import { StatusAudioCampaign } from "@/lib/generated/prisma/enums";
 
 const NewCampaingForm = () => {
   const [loading, setLoading] = useState(false);
@@ -37,14 +37,17 @@ const NewCampaingForm = () => {
   const [duration, setDuration] = useState("2"); // per weeks
 
   const [costPerAudio, setCostPerAudio] = useState("2"); // in dollars USD
-  const [status, setStatus] = useState("en_cours");
+  // const [status, setStatus] = useState("en_cours");
+  const [startDate, setStartDate] = useState(
+    new Date().toISOString().slice(0, 16),
+  );
 
   const isButtonDisabled = useMemo(() => {
     if (loading) return true;
-    if (!campaignName || !duration || !costPerAudio) return true;
+    if (!campaignName || !duration || !costPerAudio || !startDate) return true;
 
     return false;
-  }, [campaignName, costPerAudio, duration, loading]);
+  }, [campaignName, costPerAudio, duration, loading, startDate]);
 
   //   handlesubmit
 
@@ -65,8 +68,8 @@ const NewCampaingForm = () => {
       const data: AudioDataType = {
         costPerAudio: Number(costPerAudio),
         duration: Number(duration),
-        name: campaignName.trim().toLocaleLowerCase(),
-        status: status as StatusAudioCampaign,
+        name: campaignName.trim().toLowerCase(),
+        startDate: new Date(startDate),
       };
 
       const result = await newAudioCampaign(data);
@@ -78,6 +81,11 @@ const NewCampaingForm = () => {
 
       toast.success(result.message);
       router.refresh();
+
+      setStartDate(new Date().toISOString().slice(0, 16));
+      setDuration("2");
+      setCampaignName("");
+      setCostPerAudio("2");
     } catch (error) {
       console.error("ERROR ON CREATE CAMP", error);
       toast.error("Impossible continuer sur cette action!");
@@ -154,7 +162,7 @@ const NewCampaingForm = () => {
           </div>
 
           {/* STATUS  */}
-          <div className="w-full grid gap-2">
+          {/* <div className="w-full grid gap-2">
             <Label htmlFor="status">
               Status
               <span className="text-destructive">*</span>
@@ -175,6 +183,20 @@ const NewCampaingForm = () => {
                 </SelectGroup>
               </SelectContent>
             </Select>
+          </div> */}
+
+          <div className="w-full grid gap-2">
+            <Label htmlFor="startDate">
+              Début de la campagne
+              <span className="text-destructive">*</span>
+            </Label>
+
+            <Input
+              id="startDate"
+              type="datetime-local"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
           </div>
         </div>
 
