@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type AudioSubscriberWithCamp = AudioSubscriber & {
   audioCampaign: AudioCampaign;
@@ -235,7 +236,6 @@ export default function MainAudioSubscribers({ audioSubscribers }: Props) {
                 </div>
 
                 {/* DATE EN BAS DE CONTENU */}
-                {/* DATE EN BAS DE CONTENU */}
                 <div className="flex items-center gap-1.5 text-[11px] pl-0.5">
                   <Calendar className="h-3.5 w-3.5" />
 
@@ -282,13 +282,14 @@ export default function MainAudioSubscribers({ audioSubscribers }: Props) {
 
               {/* CARD FOOTER BUTTONS */}
               <CardFooter className="p-4 bg-muted/20 border-t border-border/60 flex justify-end items-center">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="h-8 text-xs font-medium px-3 gap-1.5 shadow-none border-border hover:bg-background hover:text-foreground transition-all"
-                >
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
-                  Fiche Client
+                <Button size="sm" variant="outline" asChild>
+                  <Link
+                    href={`/audio/mes-campagnes/${sub.id}`}
+                    className="h-8 text-xs font-medium px-3 gap-1.5 shadow-none border-border hover:bg-background hover:text-foreground transition-all"
+                  >
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    Details
+                  </Link>
                 </Button>
               </CardFooter>
             </Card>

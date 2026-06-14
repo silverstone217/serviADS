@@ -5,6 +5,7 @@ import { inter, lato } from "@/lib/fonts";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import AuthProvider from "@/components/providers/auth-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export const metadata: Metadata = {
   title: "SERVI ADS",
@@ -37,7 +38,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <main>{children}</main>
+            <TooltipProvider>
+              <main>{children}</main>
+            </TooltipProvider>
             <Toaster />
           </AuthProvider>
         </ThemeProvider>

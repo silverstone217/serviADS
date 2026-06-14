@@ -2,11 +2,18 @@
 import { DASHBOARD_LINKS } from "@/utils/links";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
 import React from "react";
+
+const PATHNAME_AUDIO = ["/audio", "/audio/mes-campagnes"];
 
 const HeaderNav = () => {
   const pathname = usePathname();
+
+  const shouldShow = PATHNAME_AUDIO.includes(pathname);
+
+  if (!shouldShow) {
+    return null;
+  }
 
   return (
     <div className="w-full p-4 md:px-6 xl:px-8 gap-4 max-w-xl mx-auto">

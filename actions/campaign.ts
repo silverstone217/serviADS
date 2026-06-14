@@ -8,6 +8,7 @@ export type AudioDataType = {
   duration: number;
   costPerAudio: number;
   startDate: Date;
+  audioMaxDuration: number;
 };
 
 // CREATE AUDIO CAMPAIGN AS ADMIN
@@ -46,6 +47,7 @@ export const newAudioCampaign = async (data: AudioDataType) => {
         startDate: data.startDate,
         duration: data.duration,
         costPerAudio: data.costPerAudio,
+        audioMaxDuration: data.audioMaxDuration,
       },
     });
 
@@ -67,6 +69,15 @@ export const getAllAudioCampaings = async () => {
   const camps = await prisma.audioCampaign.findMany({
     orderBy: {
       createdAt: "desc",
+    },
+    include: {
+      audioSubscribers: {
+        select: {
+          id: true,
+          audioFile: true,
+          createdAt: true,
+        },
+      },
     },
   });
 
@@ -100,6 +111,7 @@ export type AudioDataModType = {
   duration: number;
   costPerAudio: number;
   startDate: Date;
+  audioMaxDuration: number;
 };
 
 // CREATE AUDIO CAMPAIGN AS ADMIN
@@ -142,6 +154,7 @@ export const modifyAudioCampaign = async (data: AudioDataModType) => {
         duration: data.duration,
         costPerAudio: data.costPerAudio,
         startDate: data.startDate,
+        audioMaxDuration: data.audioMaxDuration,
       },
     });
 

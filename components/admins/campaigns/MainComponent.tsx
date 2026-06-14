@@ -9,7 +9,9 @@ import {
   Trash2,
   Calendar,
   DollarSign,
+  Music,
   Clock,
+  Users,
 } from "lucide-react";
 
 // Importations des composants Shadcn UI
@@ -37,8 +39,17 @@ import { useRouter } from "next/navigation";
 import { CampaignStatus } from "@/types/campaign";
 import { getCampaignStatus } from "@/utils/campaign";
 
+type audioCampaignsProps = {
+  id: string;
+  audioFile: string | null;
+  createdAt: Date;
+};
+type AudioMainComponentProp = AudioCampaign & {
+  audioSubscribers: audioCampaignsProps[];
+};
+
 interface AudioMainComponentProps {
-  audioCampaigns: AudioCampaign[];
+  audioCampaigns: AudioMainComponentProp[];
 }
 
 const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
@@ -210,24 +221,29 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Clock className="h-4 w-4 text-muted-foreground/70" />
-                    <span>{camp.duration} min</span>
+                    <span>
+                      {camp.duration} semaine{camp.duration > 1 && "s"}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <DollarSign className="h-4 w-4 text-muted-foreground/70" />
-                    <span>{formatCurrency(camp.costPerAudio)}</span>
+
+                  {/*  Max duree */}
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/80 pt-1">
+                    <Music className="h-3.5 w-3.5" />
+                    <span>Duree max {camp.audioMaxDuration} secs.</span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   {/* Date de création */}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground/80 pt-1">
+                  {/* <div className="flex items-center gap-2 text-xs text-muted-foreground/80 pt-1">
                     <Calendar className="h-3.5 w-3.5" />
                     <span>
                       Créé le{" "}
                       {new Date(camp.createdAt).toLocaleDateString("fr-FR")}
                     </span>
-                  </div>
+                  </div> */}
 
+                  {/* START DATE */}
                   <div className="flex items-center gap-2 text-xs text-muted-foreground/80">
                     <Calendar className="h-3.5 w-3.5" />
                     <span>
@@ -235,7 +251,21 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
                       {new Date(camp.startDate).toLocaleDateString("fr-FR")}
                     </span>
                   </div>
+
+                  {/* COST */}
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <DollarSign className="h-4 w-4 text-muted-foreground/70" />
+                    <span>{formatCurrency(camp.costPerAudio)}</span>
+                  </div>
                 </div>
+
+                {/*  Max duree */}
+                {camp.audioSubscribers.length > 0 && (
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground/80 pt-1">
+                    <Users className="h-3.5 w-3.5" />
+                    <span>{camp.audioSubscribers.length} sous.</span>
+                  </div>
+                )}
               </CardContent>
 
               {/* Footer Card : Actions */}

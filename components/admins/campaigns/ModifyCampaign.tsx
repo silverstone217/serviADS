@@ -52,6 +52,9 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
   const [startDate, setStartDate] = useState(
     new Date(audioCampaign.startDate).toISOString().slice(0, 16),
   );
+  const [maxDuration, setMaxDuration] = useState(
+    audioCampaign.audioMaxDuration.toString() ?? "30",
+  ); // in seconds
 
   const isButtonDisabled = useMemo(() => {
     if (loading) return true;
@@ -61,12 +64,14 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
       Number(duration) === audioCampaign.duration &&
       Number(costPerAudio) === audioCampaign.costPerAudio &&
       new Date(startDate).getTime() ===
-        new Date(audioCampaign.startDate).getTime()
+        new Date(audioCampaign.startDate).getTime() &&
+      audioCampaign.audioMaxDuration === Number(maxDuration)
     )
       return true;
 
     return false;
   }, [
+    audioCampaign.audioMaxDuration,
     audioCampaign.costPerAudio,
     audioCampaign.duration,
     audioCampaign.name,
@@ -75,6 +80,7 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
     costPerAudio,
     duration,
     loading,
+    maxDuration,
     startDate,
   ]);
 
@@ -93,12 +99,18 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
         return;
       }
 
+      if (isNaN(Number(maxDuration))) {
+        toast.error("La duree doit etre un nombre (en secondes)");
+        return;
+      }
+
       const data: AudioDataModType = {
         costPerAudio: Number(costPerAudio),
         duration: Number(duration),
         name: campaignName.trim().toLowerCase(),
         startDate: new Date(startDate),
         id: audioCampaign.id,
+        audioMaxDuration: Number(maxDuration),
       };
 
       const result = await modifyAudioCampaign(data);
@@ -217,19 +229,38 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
             </Select>
           </div> */}
 
-          {/* START DATE */}
-          <div className="w-full grid gap-2">
-            <Label htmlFor="startDate">
-              Début de la campagne
-              <span className="text-destructive">*</span>
-            </Label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* START DATE */}
+            <div className="w-full grid gap-2">
+              <Label htmlFor="startDate">
+                Début de la campagne
+                <span className="text-destructive">*</span>
+              </Label>
 
-            <Input
-              id="startDate"
-              type="datetime-local"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
+              <Input
+                id="startDate"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+            </div>
+
+            {/* max audio duration */}
+            <div className="w-full grid gap-2">
+              <Label htmlFor="maxDuration">
+                Duree max de l&apos;audio (sec){" "}
+                <span className="text-destructive">*</span>
+              </Label>
+              <Input
+                id="maxDuration"
+                placeholder="30"
+                value={maxDuration}
+                onChange={(e) => setMaxDuration(e.target.value)}
+                type="number"
+                min={0}
+                step={5}
+              />
+            </div>
           </div>
         </div>
 

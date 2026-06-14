@@ -92,8 +92,9 @@ model AudioCampaign {
   // status StatusAudioCampaign @default(en_cours)
   startDate DateTime @default(now()) @map("start_date")
 
-  duration     Float @default(2) //week
-  costPerAudio Float @default(2) // usd dollars
+  duration         Float @default(2) //week
+  costPerAudio     Float @default(2) // usd dollars
+  audioMaxDuration Float @default(30) // in seconds
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

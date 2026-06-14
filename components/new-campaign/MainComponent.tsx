@@ -26,6 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { FaInfoCircle } from "react-icons/fa";
 
 type Props = {
   audioCampaigns: AudioCampaign[];
@@ -74,12 +80,38 @@ export default function MainComponent({ audioCampaigns }: Props) {
     : audioCampaigns[0].costPerAudio;
 
   const max_taxis = 5;
+  const audiomaxDuration = audioCampaign ? audioCampaign.audioMaxDuration : 30;
 
-  // const totalDiffusions =
-  //   taxiNumber *
-  //   estimatedDiffusionsPerTaxiPerDay *
-  //   daysInMonth *
-  //   Number(campaignDuration);
+  // CHECK IF AUDIO DURATION IS HIGHER THAN MAX AUDIO DURATION
+  const validateAudioDuration = (file: File): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const audio = document.createElement("audio");
+
+      audio.preload = "metadata";
+
+      audio.onloadedmetadata = () => {
+        URL.revokeObjectURL(audio.src);
+
+        const duration = audio.duration; // secondes
+
+        if (duration <= audiomaxDuration) {
+          resolve(true);
+        } else {
+          toast.error(
+            `La durée de l'audio ne doit pas dépasser ${audiomaxDuration} secondes.`,
+          );
+          resolve(false);
+        }
+      };
+
+      audio.onerror = () => {
+        toast.error("Impossible de lire le fichier audio.");
+        resolve(false);
+      };
+
+      audio.src = URL.createObjectURL(file);
+    });
+  };
 
   // Drag & Drop Handlers
   const handleDrag = (e: React.DragEvent) => {
@@ -92,25 +124,40 @@ export default function MainComponent({ audioCampaigns }: Props) {
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
 
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (file.type === "audio/mpeg" || file.type === "audio/wav") {
-        setAudioFile(file);
-      }
+    const file = e.dataTransfer.files?.[0];
+
+    if (!file) return;
+
+    if (file.type !== "audio/mpeg" && file.type !== "audio/wav") {
+      toast.error("Seuls les fichiers MP3 et WAV sont autorisés.");
+      return;
+    }
+
+    const isValid = await validateAudioDuration(file);
+
+    if (isValid) {
+      setAudioFile(file);
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setAudioFile(e.target.files[0]);
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    const isValid = await validateAudioDuration(file);
+
+    if (isValid) {
+      setAudioFile(file);
+    } else {
+      e.target.value = "";
     }
   };
-
   // AUDIO DURATION CALCULATION (Optional, can be enhanced with a library like 'music-metadata-browser') in secondes
 
   useEffect(() => {
@@ -124,8 +171,7 @@ export default function MainComponent({ audioCampaigns }: Props) {
   }, [audioFile]);
 
   // Calculate totalprice by duration and nbr of taxis
-  const totalprice =
-    Number(audioDuration / 30) * costPerAudio + taxiNumber * costPerAudio;
+  const totalprice = taxiNumber * costPerAudio;
 
   const handleSubmit = async () => {
     try {
@@ -276,7 +322,17 @@ export default function MainComponent({ audioCampaigns }: Props) {
                     />
                   </div>
                   <div className="flex min-w-0 flex-col gap-2">
-                    <Label htmlFor="clientPhone">Téléphone du client</Label>
+                    <div className="flex w-full items-center gap-2">
+                      <Label htmlFor="clientPhone">Téléphone du client</Label>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <FaInfoCircle className="w-4 h-4" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Numero mobile money pour proceder au paiement</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
                     <Input
                       id="clientPhone"
                       type="tel"
@@ -387,7 +443,7 @@ export default function MainComponent({ audioCampaigns }: Props) {
                         Cliquez pour importer ou glissez-déposez
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        MP3 ou WAV (Max. 10MB, Idéalement 30 secondes)
+                        MP3 ou WAV (Max. 5MB, Idéalement 30 secondes)
                       </p>
                     </button>
                   ) : (
@@ -542,12 +598,12 @@ export default function MainComponent({ audioCampaigns }: Props) {
                 </span>
               </div>
             )}
-            <div className="flex justify-between items-center">
+            {/* <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Durée d&apos;audio</span>
               <span className="font-semibold text-foreground">
                 {audioDuration} secondes
               </span>
-            </div>
+            </div> */}
 
             {audioCampaign && (
               <div className="flex justify-between items-center">
