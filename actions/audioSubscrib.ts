@@ -57,6 +57,7 @@ export const audioSubcriber = async (data: AudioSubcribersType) => {
 export const updateAudioSubscriberUrl = async (
   audioSubscribedId: string,
   audioUrl: string,
+  audioDuration: number,
 ) => {
   try {
     const user = await getUser();
@@ -91,6 +92,7 @@ export const updateAudioSubscriberUrl = async (
       },
       data: {
         audioFile: audioUrl,
+        audioDuration,
       },
     });
 

@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { AudioCampaign, AudioSubscriber } from "@/lib/generated/prisma/client";
+import ModifySound from "./ModifySound";
 
 type SubscriptionWithCampaign = AudioSubscriber & {
   audioCampaign: AudioCampaign;
@@ -233,8 +234,16 @@ export default function SubscriptionDetailsClient({ subscription }: Props) {
 
         {/* Lecteur Audio Intégré */}
         <Card className="shadow-sm flex flex-col justify-between">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
+          <CardHeader className="relative ">
+            {isUpcoming && (
+              <ModifySound
+                audioSubId={subscription.id}
+                campaignId={subscription.audioCampaignId}
+                audioFileUrl={subscription.audioFile}
+                audiomaxDuration={subscription.audioCampaign.audioMaxDuration}
+              />
+            )}
+            <CardTitle className="text-lg flex items-center gap-2 pb-4 pt-6">
               <Clock className="h-5 w-5 text-blue-600" />
               Spot Publicitaire
             </CardTitle>
@@ -346,7 +355,7 @@ export default function SubscriptionDetailsClient({ subscription }: Props) {
             <Button
               variant="destructive"
               className="w-full sm:w-auto gap-2 rounded-xl"
-              disabled={!canCancel || loading}
+              disabled /*={!canCancel || loading}*/
             >
               {loading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

@@ -257,6 +257,7 @@ export default function MainComponent({ audioCampaigns }: Props) {
       const resultAudio = await updateAudioSubscriberUrl(
         audioSubscribedId,
         audioUrl,
+        audioDuration,
       );
 
       if (resultAudio.error) {
