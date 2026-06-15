@@ -102,6 +102,20 @@ model AudioCampaign {
   audioSubscribers AudioSubscriber[]
 }
 
+enum PaymentMethod {
+  flexpaie
+  cinetpay
+  mpesa
+  cash
+  bank
+}
+
+// enum PaymentStatus {
+//   en_attente_de_paiement
+//   paye
+//   annule
+// }
+
 model AudioSubscriber {
   id              String @id @default(cuid())
   audioCampaignId String
@@ -120,6 +134,12 @@ model AudioSubscriber {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  paymentRef    String? // reference du paiement
+  // paymentRefRefund    String?
+  paymentMethod PaymentMethod @default(flexpaie) //cinetpay, mpesa, cash, flexpaie, bank
+  // paymentMethodRefund String  @default("mpesa")
+  // paymentStatus       PaymentStatus  @default(paye)
 
   subscriber    User          @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
   audioCampaign AudioCampaign @relation(fields: [audioCampaignId], references: [id], onDelete: Cascade)

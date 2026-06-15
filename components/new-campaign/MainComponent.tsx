@@ -205,6 +205,15 @@ export default function MainComponent({ audioCampaigns }: Props) {
         price: totalprice,
         taxiNumber,
       };
+
+      toast.info(
+        "Vous avez 30 secondes pour valider le paiement sur votre mobile.",
+      );
+
+      setTimeout(() => {
+        toast.info("Valider le paiement sur votre telephone.");
+      }, 1000);
+
       const result = await audioSubcriber(data);
 
       if (result.error) {
