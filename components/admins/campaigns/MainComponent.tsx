@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { CampaignStatus } from "@/types/campaign";
 import { getCampaignStatus } from "@/utils/campaign";
+import DeleteCampaignDialog from "./DeleteCampaignDialog";
 
 type audioCampaignsProps = {
   id: string;
@@ -270,17 +271,14 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
 
               {/* Footer Card : Actions */}
               <CardFooter className="bg-muted/30 px-6 py-3 border-t flex justify-end items-center gap-2">
+                {/* MODIFY CAMPAIGN */}
                 <ModifyCampaign audioCampaign={camp} />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(camp.id)}
-                  className="h-8 text-xs gap-1.5 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  disabled={loading}
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Supprimer
-                </Button>
+
+                {/* DELETING CAMPAIGN */}
+                <DeleteCampaignDialog
+                  campaignName={camp.name}
+                  onConfirm={() => handleDelete(camp.id)}
+                />
               </CardFooter>
             </Card>
           ))}

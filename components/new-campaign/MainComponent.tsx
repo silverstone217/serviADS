@@ -38,7 +38,9 @@ type Props = {
 };
 
 export default function MainComponent({ audioCampaigns }: Props) {
-  const [audioCampaignId, setAudioCampaignId] = useState(audioCampaigns[0].id);
+  const [audioCampaignId, setAudioCampaignId] = useState(
+    audioCampaigns?.[0]?.id ?? "",
+  );
 
   const [companyName, setCompanyName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
@@ -284,6 +286,10 @@ export default function MainComponent({ audioCampaigns }: Props) {
       setLoading(false);
     }
   };
+
+  if (!audioCampaign || !audioCampaignId) {
+    return <div className="p-6 text-center">Aucune campagne disponible.</div>;
+  }
 
   return (
     <div className="mx-auto max-w-6xl pb-10 pt-4">

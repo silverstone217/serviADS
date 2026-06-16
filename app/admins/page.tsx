@@ -19,6 +19,7 @@ export default async function page() {
       </div>
 
       {/* MAIN COMPONENT */}
+
       <MainComponent audioCampaigns={audioCampaigns} />
     </div>
   );

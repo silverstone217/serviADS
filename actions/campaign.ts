@@ -2,6 +2,8 @@
 
 import prisma from "@/lib/prisma";
 import { getUser } from "./user";
+import { storage } from "@/lib/firebase";
+import { deleteObject, listAll, ref } from "firebase/storage";
 
 export type AudioDataType = {
   name: string;
@@ -185,11 +187,20 @@ export const deleteAudioCampaignById = async (id: string) => {
       };
     }
 
+    // DELETE SOUND
+    const campaignId = id;
+
+    const folderRef = ref(storage, `audio-campaigns/${campaignId}`);
+
+    const files = await listAll(folderRef);
+
     await prisma.audioCampaign.delete({
       where: {
         id,
       },
     });
+
+    await Promise.all(files.items.map((fileRef) => deleteObject(fileRef)));
 
     return {
       message: "Campagne supprimee!",

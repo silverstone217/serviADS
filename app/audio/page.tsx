@@ -12,7 +12,11 @@ async function page() {
 
       {/* MAIN CONTENT */}
       <main className="flex flex-col gap-4 mx-auto max-w-6xl px-4">
-        <h1 className={`text-3xl font-bold ${inter.className} `}>
+        <h1
+          className={`text-3xl font-bold ${inter.className} max-w-2xl w-full mx-auto
+        px-4
+          `}
+        >
           Créer une Publicite audio
         </h1>
 
@@ -22,7 +26,7 @@ async function page() {
         </p> */}
 
         {/* MAIN COMPONENT */}
-        {audioCampaigns ? (
+        {audioCampaigns && audioCampaigns.length > 0 ? (
           <MainComponent audioCampaigns={audioCampaigns} />
         ) : (
           <div
