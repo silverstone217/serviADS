@@ -9,8 +9,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { phone, password } = body;
 
-    console.log({ body });
-
     if (!phone || !password) {
       return NextResponse.json(
         { erreur: true, message: "Tous les champs sont obligatoires" },
