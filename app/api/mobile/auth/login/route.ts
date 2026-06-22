@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     if (!phone || !password) {
       return NextResponse.json(
-        { erreur: true, message: "Tous les champs sont obligatoires" },
+        { error: true, message: "Tous les champs sont obligatoires" },
         { status: 400 },
       );
     }
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // CHECK IF USER EXISTS
     if (!isUserExist) {
       return NextResponse.json(
-        { erreur: true, message: "Numéro ou mot de passe incorrect" },
+        { error: true, message: "Numéro ou mot de passe incorrect" },
         { status: 401 },
       );
     }
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     if (!comparePassword) {
       return NextResponse.json(
-        { erreur: true, message: "Mot de passe incorrect!" },
+        { error: true, message: "Mot de passe incorrect!" },
         { status: 401 },
       );
     }
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        erreur: false,
+        error: false,
         message: "Connexion reussie",
         token,
         user: {

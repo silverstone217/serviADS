@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     if (!phone || !password || !name) {
       return NextResponse.json(
-        { erreur: true, message: "Tous les champs sont obligatoires" },
+        { error: true, message: "Tous les champs sont obligatoires" },
         { status: 400 },
       );
     }
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
     // CHECK IF USER EXISTS
     if (isUserExist) {
       return NextResponse.json(
-        { erreur: true, message: "Ce numéro existe déjà" },
+        { error: true, message: "Ce numéro existe déjà" },
         { status: 409 }, // Conflict
       );
     }
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       {
-        erreur: false,
+        error: false,
         message: "Votre compte a été créé",
         token,
         user: {
