@@ -92,14 +92,7 @@ export async function POST(request: NextRequest) {
           costPerAudio: currentCampaign.costPerAudio,
           audioMaxDuration: currentCampaign.audioMaxDuration,
 
-          audios: currentCampaign.audioSubscribers.map((a) => {
-            return {
-              id: a.id,
-              createdAt: a.createdAt,
-              audioFile: a.audioFile,
-              audioDuration: a.audioDuration,
-            };
-          }),
+          audios: currentCampaign.audioSubscribers,
         },
       },
       { status: 200 },
