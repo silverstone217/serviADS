@@ -34,10 +34,15 @@ import { AudioDataModType, modifyAudioCampaign } from "@/actions/campaign";
 
 interface ModifyCampaignProps {
   audioCampaign: AudioCampaign;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  loading: boolean;
 }
 
-const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
-  const [loading, setLoading] = useState(false);
+const ModifyCampaign = ({
+  audioCampaign,
+  loading,
+  setLoading,
+}: ModifyCampaignProps) => {
   const router = useRouter();
 
   const [campaignName, setCampaignName] = useState(audioCampaign.name ?? "");
@@ -83,6 +88,15 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
     maxDuration,
     startDate,
   ]);
+
+  const isCampaignRunning = useMemo(() => {
+    const now = new Date();
+
+    const endDate = new Date(audioCampaign.startDate);
+    endDate.setDate(endDate.getDate() + audioCampaign.duration * 7);
+
+    return now >= new Date(audioCampaign.startDate) && now <= endDate;
+  }, [audioCampaign.startDate, audioCampaign.duration]);
 
   //   SUBMIT
   const handleSubmit = async () => {
@@ -264,9 +278,21 @@ const ModifyCampaign = ({ audioCampaign }: ModifyCampaignProps) => {
           </div>
         </div>
 
+        <div>
+          {isCampaignRunning && (
+            <p className="text-xs text-orange-500">
+              Cette campagne est actuellement en cours et ne peut plus être
+              modifiée.
+            </p>
+          )}
+        </div>
+
         <AlertDialogFooter>
           <AlertDialogCancel>Annuler</AlertDialogCancel>
-          <AlertDialogAction disabled={isButtonDisabled} onClick={handleSubmit}>
+          <AlertDialogAction
+            disabled={isButtonDisabled || isCampaignRunning}
+            onClick={handleSubmit}
+          >
             {loading ? (
               <Loader size={20} className="animate-spin" />
             ) : (

@@ -46,7 +46,7 @@ const Header = () => {
         <div className="lg:flex items-center hidden gap-4">
           <div>{user ? <PopOverProfile /> : <AuthComponent />}</div>
           <Button>
-            <Link href={"/mon-espace"}>Créer une campagne</Link>
+            <Link href={"/audio"}>Créer une campagne</Link>
           </Button>
         </div>
 

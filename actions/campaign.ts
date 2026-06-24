@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { getUser } from "./user";
 import { storage } from "@/lib/firebase";
 import { deleteObject, listAll, ref } from "firebase/storage";
+import { isCampaignRunning } from "@/utils/functions";
 
 export type AudioDataType = {
   name: string;
@@ -124,6 +125,27 @@ export const modifyAudioCampaign = async (data: AudioDataModType) => {
     if (!user || user.isBanned || user.role !== "ADMIN") {
       return {
         message: "Acces refuse!",
+        error: true,
+      };
+    }
+
+    const campaign = await prisma.audioCampaign.findUnique({
+      where: {
+        id: data.id,
+      },
+    });
+
+    if (!campaign) {
+      return {
+        message: "Campagne introuvable.",
+        error: true,
+      };
+    }
+
+    // Vérifier si la campagne est en cours
+    if (isCampaignRunning(campaign.startDate, campaign.duration)) {
+      return {
+        message: "Impossible de modifier une campagne en cours.",
         error: true,
       };
     }

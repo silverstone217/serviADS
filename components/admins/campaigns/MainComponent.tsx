@@ -6,7 +6,6 @@ import { AudioCampaign } from "@/lib/generated/prisma/client";
 import {
   Search,
   SlidersHorizontal,
-  Trash2,
   Calendar,
   DollarSign,
   Music,
@@ -113,10 +112,6 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
       currency: "USD",
     }).format(amount);
   };
-
-  // const handleEdit = (id: string) => {
-  //   console.log("Modifier la campagne :", id);
-  // };
 
   const handleDelete = async (id: string) => {
     try {
@@ -271,7 +266,11 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
               {/* Footer Card : Actions */}
               <CardFooter className="bg-muted/30 px-6 py-3 border-t flex justify-end items-center gap-2">
                 {/* MODIFY CAMPAIGN */}
-                <ModifyCampaign audioCampaign={camp} />
+                <ModifyCampaign
+                  audioCampaign={camp}
+                  loading={loading}
+                  setLoading={setLoading}
+                />
 
                 {/* DELETING CAMPAIGN */}
                 <DeleteCampaignDialog
