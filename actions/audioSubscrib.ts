@@ -70,55 +70,55 @@ export const audioSubcriber = async (data: AudioSubcribersType) => {
     };
 
     // call flexpaie api to init payment
-    const response = await fetch(flexpaieApiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${flexpaieApiToken}`,
-      },
-      body: JSON.stringify(flexpaieData),
-    });
+    // const response = await fetch(flexpaieApiUrl, {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //     Authorization: `Bearer ${flexpaieApiToken}`,
+    //   },
+    //   body: JSON.stringify(flexpaieData),
+    // });
 
     // console.log("Flexpaie response:", response);
 
-    const dataResponse = (await response.json()) as PaymentFlexpaieResponseType;
+    // const dataResponse = (await response.json()) as PaymentFlexpaieResponseType;
 
-    console.log("RESPONSE:", dataResponse);
+    // console.log("RESPONSE:", dataResponse);
 
-    if (!response.ok) {
-      throw new Error(
-        `Flexpaie Error ${response.status}: ${JSON.stringify(dataResponse)}`,
-      );
-    }
+    // if (!response.ok) {
+    //   throw new Error(
+    //     `Flexpaie Error ${response.status}: ${JSON.stringify(dataResponse)}`,
+    //   );
+    // }
 
     // console.log("Flexpaie data:", data);
 
     // Paiement accepté, préparer les données de commande
-    const paymentCode = dataResponse.code;
+    // const paymentCode = dataResponse.code;
 
-    if (paymentCode !== "0") {
-      return {
-        error: true,
-        message: `Le paiement a échoué: ${dataResponse.message}`,
-        data: null,
-      };
-    }
+    // if (paymentCode !== "0") {
+    //   return {
+    //     error: true,
+    //     message: `Le paiement a échoué: ${dataResponse.message}`,
+    //     data: null,
+    //   };
+    // }
 
-    const paymentRef = dataResponse.orderNumber;
+    const paymentRef = transaction_id; /*dataResponse.orderNumber;*/
 
     // WAIT 30 SECONDS BEFORE CALLING THE NEW ORDER ACTION TO ENSURE PAYMENT IS PROCESSED
-    const isPaymentSuccessful = await checkFlexpaiePaymentAfterDelais(
-      paymentRef,
-      35,
-    );
+    // const isPaymentSuccessful = await checkFlexpaiePaymentAfterDelais(
+    //   paymentRef,
+    //   35,
+    // );
 
-    if (!isPaymentSuccessful) {
-      return {
-        error: true,
-        message: "Le paiement n'a pas été confirmé. Veuillez réessayer.",
-        data: null,
-      };
-    }
+    // if (!isPaymentSuccessful) {
+    //   return {
+    //     error: true,
+    //     message: "Le paiement n'a pas été confirmé. Veuillez réessayer.",
+    //     data: null,
+    //   };
+    // }
 
     // CREATE NEW SUBSCRIPTION
     const newAudio = await prisma.audioSubscriber.create({
