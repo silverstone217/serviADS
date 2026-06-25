@@ -100,6 +100,7 @@ model AudioCampaign {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   audioSubscribers AudioSubscriber[]
+  logs             AudioLogs[]
 }
 
 enum PaymentMethod {
@@ -162,4 +163,28 @@ model TaxiUser {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  logs AudioLogs[]
+}
+
+model AudioLogs {
+  id         String @id @default(cuid())
+  campaignId String
+  taxiUserId String
+
+  avgSpeed      Float @default(0) // En km/h
+  totalDuration Float @default(0) // En secondes
+
+  date DateTime // Date du log (sans l'heure, ex: YYYY-MM-DD)
+
+  // 🔗 Relations (Ajuste les noms "Campaign" et "User" selon tes vrais modèles)
+  campaign AudioCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  taxi     TaxiUser      @relation(fields: [taxiUserId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 🛡️ Sécurité : Un taxi ne peut avoir qu'UN SEUL log par jour pour une même campagne
+  @@unique([taxiUserId, campaignId, date])
+  @@map("logs")
 }
