@@ -96,12 +96,18 @@ export async function POST(request: NextRequest) {
     const campaigns = await prisma.audioCampaign.findMany({
       include: {
         audioSubscribers: {
+          where: {
+            limitDownloadNumber: {
+              gt: 0,
+            },
+          },
           select: {
             id: true,
             audioFile: true,
             audioDuration: true,
             companyName: true,
             createdAt: true,
+            limitDownloadNumber: true,
           },
         },
       },

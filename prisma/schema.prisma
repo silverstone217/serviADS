@@ -111,12 +111,6 @@ enum PaymentMethod {
   bank
 }
 
-// enum PaymentStatus {
-//   en_attente_de_paiement
-//   paye
-//   annule
-// }
-
 model AudioSubscriber {
   id              String @id @default(cuid())
   audioCampaignId String
@@ -125,8 +119,10 @@ model AudioSubscriber {
   audioFile     String? //url from firebase
   audioDuration Float // in seconds
 
-  zone       String @default("kinshasa")
-  taxiNumber Int    @default(1)
+  zone                String @default("kinshasa")
+  taxiNumber          Int    @default(1)
+  // ADDED LIMIT NUMBER OF DOWNLOADED (TO KNOW IF THE SOUND STILL CAN BE DOWNLOADED BASED ON TAXINUMBER)
+  limitDownloadNumber Int    @default(0)
 
   companyName String?
   clientPhone String
@@ -188,3 +184,9 @@ model AudioLogs {
   @@unique([taxiUserId, campaignId, date])
   @@map("logs")
 }
+
+// enum PaymentStatus {
+//   en_attente_de_paiement
+//   paye
+//   annule
+// }

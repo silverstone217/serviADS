@@ -132,6 +132,7 @@ export const audioSubcriber = async (data: AudioSubcribersType) => {
         audioCampaignId: data.audioCampaignId,
         paymentRef: paymentRef || transaction_id,
         paymentMethod: "flexpaie",
+        limitDownloadNumber: data.taxiNumber,
       },
     });
 
