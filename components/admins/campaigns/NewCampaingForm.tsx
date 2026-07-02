@@ -34,7 +34,7 @@ const NewCampaingForm = () => {
   const router = useRouter();
 
   const [campaignName, setCampaignName] = useState("");
-  const [duration, setDuration] = useState("2"); // per weeks
+  const [duration, setDuration] = useState("2"); // per days
 
   const [costPerAudio, setCostPerAudio] = useState("2"); // in dollars USD
   // const [status, setStatus] = useState("en_cours");
@@ -70,7 +70,7 @@ const NewCampaingForm = () => {
       }
 
       if (isNaN(Number(duration))) {
-        toast.error("La duree doit etre un nombre (en semaine)");
+        toast.error("La duree doit etre un nombre (en jours)");
         return;
       }
 
@@ -147,7 +147,7 @@ const NewCampaingForm = () => {
             {/* Campaign duration */}
             <div className="w-full grid gap-2">
               <Label htmlFor="duration">
-                Duree de la campagne (en semaine){" "}
+                Duree de la campagne (en jours){" "}
                 <span className="text-destructive">*</span>
               </Label>
               <Input

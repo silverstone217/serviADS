@@ -56,7 +56,7 @@ export default function MainComponent({ audioCampaigns }: Props) {
   // Étape 3 States (Synchronisés sur les valeurs de l'image)
   const [taxiNumber, setTaxiNumber] = useState<number>(2);
   // const [zone, setZone] = useState("kinshasa");
-  // const [campaignDuration, setCampaignDuration] = useState("2"); // 2 semaines
+  // const [campaignDuration, setCampaignDuration] = useState("2"); // 2 jours par défaut
 
   // const campaignDuration = audioCampaign
   //   ? audioCampaign.duration.toString()
@@ -609,7 +609,7 @@ export default function MainComponent({ audioCampaigns }: Props) {
                   Durée de la campagne
                 </span>
                 <span className="font-semibold text-foreground">
-                  {audioCampaign?.duration} semaine
+                  {audioCampaign?.duration} jour
                   {audioCampaign?.duration.toString() > "1" && "s"}
                 </span>
               </div>

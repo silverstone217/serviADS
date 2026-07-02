@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { AudioDataModType, modifyAudioCampaign } from "@/actions/campaign";
+import { isCampaignRunning as isCampaignRunningfunc } from "@/utils/functions";
 
 interface ModifyCampaignProps {
   audioCampaign: AudioCampaign;
@@ -48,7 +49,7 @@ const ModifyCampaign = ({
   const [campaignName, setCampaignName] = useState(audioCampaign.name ?? "");
   const [duration, setDuration] = useState(
     audioCampaign.duration.toString() ?? "2",
-  ); // per weeks
+  ); // per days
 
   const [costPerAudio, setCostPerAudio] = useState(
     audioCampaign.costPerAudio.toString() ?? "2",
@@ -90,12 +91,12 @@ const ModifyCampaign = ({
   ]);
 
   const isCampaignRunning = useMemo(() => {
-    const now = new Date();
+    const isRun = isCampaignRunningfunc(
+      audioCampaign.startDate,
+      audioCampaign.duration,
+    );
 
-    const endDate = new Date(audioCampaign.startDate);
-    endDate.setDate(endDate.getDate() + audioCampaign.duration * 7);
-
-    return now >= new Date(audioCampaign.startDate) && now <= endDate;
+    return isRun;
   }, [audioCampaign.startDate, audioCampaign.duration]);
 
   //   SUBMIT
@@ -109,7 +110,7 @@ const ModifyCampaign = ({
       }
 
       if (isNaN(Number(duration))) {
-        toast.error("La duree doit etre un nombre (en semaine)");
+        toast.error("La duree doit etre un nombre (en jours)");
         return;
       }
 
@@ -186,7 +187,7 @@ const ModifyCampaign = ({
             {/* Campaign duration */}
             <div className="w-full grid gap-2">
               <Label htmlFor="duration">
-                Duree de la campagne (en semaine){" "}
+                Duree de la campagne (en jours){" "}
                 <span className="text-destructive">*</span>
               </Label>
               <Input

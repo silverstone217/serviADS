@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { AUTH_SECRET } from "@/utils/envVaraibles";
+import { isCampaignRunning } from "@/utils/functions";
 import jwt from "jsonwebtoken";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -92,7 +93,6 @@ export async function POST(request: NextRequest) {
     }
 
     // 4️⃣ RÉCUPÉRATION DES CAMPAGNES POUR LE RETOUR MOBILE
-    const now = new Date();
     const campaigns = await prisma.audioCampaign.findMany({
       include: {
         audioSubscribers: {
@@ -118,11 +118,9 @@ export async function POST(request: NextRequest) {
 
     // TROUVER LA CAMPAGNE ACTIVE
     const currentCampaign = campaigns.find((campaign) => {
-      const startDate = new Date(campaign.startDate);
-      const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + campaign.duration * 7);
+      const active = isCampaignRunning(campaign.startDate, campaign.duration);
 
-      return now >= startDate && now <= endDate;
+      return active;
     });
 
     // RÉSULTAT STANDARD SI AUCUNE CAMPAGNE

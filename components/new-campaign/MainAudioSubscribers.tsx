@@ -41,13 +41,16 @@ interface Props {
   audioSubscribers: AudioSubscriberWithCamp[];
 }
 
-const getCampaignStatus = (startDate: Date, durationWeeks: number) => {
+const getCampaignStatus = (
+  startDate: Date,
+  durationDays: number,
+): "UPCOMING" | "ONGOING" | "FINISHED" => {
   const now = new Date();
 
   const start = new Date(startDate);
 
   const end = new Date(start);
-  end.setDate(start.getDate() + durationWeeks * 7);
+  end.setDate(start.getDate() + durationDays);
 
   if (now < start) {
     return "UPCOMING";
