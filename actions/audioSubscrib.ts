@@ -4,11 +4,9 @@ import prisma from "@/lib/prisma";
 import { getUser } from "./user";
 import { v4 } from "uuid";
 import {
-  FLEXPAIE_MERCHANT_CODE,
-  FLEXPAIE_TOKEN,
-  FLEXPAIE_URL_API,
-} from "@/utils/envVaraibles";
-import { checkFlexpaiePaymentAfterDelais } from "./flexpaieAction";
+  checkFlexpaiePaymentAfterDelais,
+  processFlexpaiePayment,
+} from "./flexpaieAction";
 
 export type AudioSubcribersType = {
   audioCampaignId: string;
@@ -35,6 +33,7 @@ export interface PaymentFlexpaieResponseType {
   orderNumber: string;
 }
 
+// CREATE NEW AUDIO SUBSCRIBER
 export const audioSubcriber = async (data: AudioSubcribersType) => {
   try {
     const user = await getUser();
@@ -47,80 +46,59 @@ export const audioSubcriber = async (data: AudioSubcribersType) => {
 
     // CHECK IF USER ALREADY SUBSCRIBBED ?
 
-    // FLEXPAIE PAYMENT ENGAGED
-    // proceed to create order
     const transaction_id = v4().toString().replace(/-/g, "");
-    const flexpaieApiToken = FLEXPAIE_TOKEN;
-    const flexpaieApiUrl = FLEXPAIE_URL_API;
 
-    // URL to notify
     const baseUrl =
       process.env.NODE_ENV === "production"
         ? "https://servi-ads.com"
         : "http://localhost:3000";
 
-    const flexpaieData: PaymentFlexpaieDataType = {
-      merchant: FLEXPAIE_MERCHANT_CODE,
-      type: "1",
-      phone: `243${data.phoneClient.replace(/^0/, "")}`,
-      reference: transaction_id,
-      amount: data.price.toString(),
-      currency: "USD",
-      callbackUrl: baseUrl + "/audio/mes-campagnes",
-    };
+    // Variables pour stocker la référence finale
+    let paymentRef = transaction_id;
 
-    // call flexpaie api to init payment
-    // const response = await fetch(flexpaieApiUrl, {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //     Authorization: `Bearer ${flexpaieApiToken}`,
-    //   },
-    //   body: JSON.stringify(flexpaieData),
-    // });
+    // ==========================================
+    // LOGIQUE DE DISTINCTION ADMIN vs CLIENT
+    // ==========================================
+    if (user.role.includes("ADMIN")) {
+      // Si c'est un admin, on passe direct à la création avec une méthode "gratuit/admin"
+      console.log(`Création de campagne par l'admin: ${user.id}`);
+      paymentRef = `ADMIN-${transaction_id}`;
+    } else {
+      // Si ce n'est pas un admin, on procède au paiement Flexpaie normal
+      const paymentResult = await processFlexpaiePayment(
+        data,
+        transaction_id,
+        baseUrl,
+      );
 
-    // console.log("Flexpaie response:", response);
+      if (paymentResult.error) {
+        return {
+          error: true,
+          message: paymentResult.message,
+          data: null,
+        };
+      }
 
-    // const dataResponse = (await response.json()) as PaymentFlexpaieResponseType;
+      paymentRef = paymentResult.orderNumber || transaction_id;
 
-    // console.log("RESPONSE:", dataResponse);
+      // ATTENTE DE 30 SECONDES POUR CONFIRMATION (Uniquement pour les clients)
+      const isPaymentSuccessful = await checkFlexpaiePaymentAfterDelais(
+        paymentRef,
+        35,
+      );
 
-    // if (!response.ok) {
-    //   throw new Error(
-    //     `Flexpaie Error ${response.status}: ${JSON.stringify(dataResponse)}`,
-    //   );
-    // }
+      if (!isPaymentSuccessful) {
+        return {
+          error: true,
+          message: "Le paiement n'a pas été confirmé. Veuillez réessayer.",
+          data: null,
+        };
+      }
+    }
 
-    // console.log("Flexpaie data:", data);
-
-    // Paiement accepté, préparer les données de commande
-    // const paymentCode = dataResponse.code;
-
-    // if (paymentCode !== "0") {
-    //   return {
-    //     error: true,
-    //     message: `Le paiement a échoué: ${dataResponse.message}`,
-    //     data: null,
-    //   };
-    // }
-
-    const paymentRef = transaction_id; /*dataResponse.orderNumber;*/
-
-    // WAIT 30 SECONDS BEFORE CALLING THE NEW ORDER ACTION TO ENSURE PAYMENT IS PROCESSED
-    // const isPaymentSuccessful = await checkFlexpaiePaymentAfterDelais(
-    //   paymentRef,
-    //   35,
-    // );
-
-    // if (!isPaymentSuccessful) {
-    //   return {
-    //     error: true,
-    //     message: "Le paiement n'a pas été confirmé. Veuillez réessayer.",
-    //     data: null,
-    //   };
-    // }
-
-    // CREATE NEW SUBSCRIPTION
+    // ==========================================
+    // ENREGISTREMENT DANS LA BASE DE DONNÉES
+    // ==========================================
     const newAudio = await prisma.audioSubscriber.create({
       data: {
         audioDuration: data.audioDuration,
@@ -128,9 +106,9 @@ export const audioSubcriber = async (data: AudioSubcribersType) => {
         subscriberId: user.id,
         companyName: data.companyName,
         clientPhone: data.phoneClient,
-        price: data.price,
+        price: /*user.role.includes("ADMIN") ? 0 : */ data.price, // Optionnel : force le prix à 0 si admin
         audioCampaignId: data.audioCampaignId,
-        paymentRef: paymentRef || transaction_id,
+        paymentRef: paymentRef,
         paymentMethod: "flexpaie",
         limitDownloadNumber: data.taxiNumber,
       },
@@ -139,7 +117,9 @@ export const audioSubcriber = async (data: AudioSubcribersType) => {
     return {
       error: false,
       audioSubscribedId: newAudio.id,
-      message: "Votre souscription est en cours veuillez patientez",
+      message: user.role.includes("ADMIN")
+        ? "Votre souscription admin a été créée avec succès"
+        : "Votre souscription est en cours veuillez patienter",
     };
   } catch (error) {
     console.error("ERROR ON SUBSCRIB ON AUDIO", error);
