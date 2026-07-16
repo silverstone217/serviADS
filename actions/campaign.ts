@@ -1,5 +1,4 @@
 "use server";
-
 import prisma from "@/lib/prisma";
 import { getUser } from "./user";
 import { storage } from "@/lib/firebase";
@@ -87,7 +86,6 @@ export const getAllAudioCampaings = async () => {
   return camps || [];
 };
 
-// GET CURRENT AUDIO CAMPAIGNS
 // GET FUTURE AUDIO CAMPAIGNS (FROM TOMORROW ONLY)
 export const getCurrentAudioCampaigns = async () => {
   const now = new Date();
@@ -141,6 +139,15 @@ export const modifyAudioCampaign = async (data: AudioDataModType) => {
         error: true,
       };
     }
+
+    console.log("CAMPAIGN DATA", {
+      isCampaignRunning: isCampaignRunning(
+        campaign.startDate,
+        campaign.duration,
+      ),
+      startDate: new Date(campaign.startDate),
+      duration: campaign.duration,
+    });
 
     // Vérifier si la campagne est en cours
     if (isCampaignRunning(campaign.startDate, campaign.duration)) {
@@ -235,4 +242,24 @@ export const deleteAudioCampaignById = async (id: string) => {
       error: true,
     };
   }
+};
+
+// GET CAMPAIGN BY ID with subscribers
+export const getAudioCampaignById = async (id: string) => {
+  const user = await getUser();
+
+  if (!user || user.isBanned || user.role !== "ADMIN") {
+    return null;
+  }
+
+  const campaign = await prisma.audioCampaign.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      audioSubscribers: true,
+    },
+  });
+
+  return campaign || null;
 };

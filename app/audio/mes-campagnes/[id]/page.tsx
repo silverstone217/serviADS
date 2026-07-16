@@ -23,6 +23,7 @@ export default async function SubscriptionDetailsPage({ params }: Props) {
   return (
     <div className="container mx-auto px-4 max-w-4xl">
       <SubscriptionDetailsClient subscription={subscription} />
+      <br />
     </div>
   );
 }

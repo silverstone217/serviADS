@@ -11,6 +11,7 @@ import {
   Music,
   Clock,
   Users,
+  ChartNoAxesGantt,
 } from "lucide-react";
 
 // Importations des composants Shadcn UI
@@ -37,6 +38,8 @@ import { useRouter } from "next/navigation";
 import { CampaignStatus } from "@/types/campaign";
 import { getCampaignStatus } from "@/utils/campaign";
 import DeleteCampaignDialog from "./DeleteCampaignDialog";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 type audioCampaignsProps = {
   id: string;
@@ -265,6 +268,17 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
 
               {/* Footer Card : Actions */}
               <CardFooter className="bg-muted/30 px-6 py-3 border-t flex justify-end items-center gap-2">
+                {/* View Campaign */}
+                <Button variant="ghost" size="sm" disabled={loading} asChild>
+                  <Link
+                    href={`/admins/campagne/${camp.id}`}
+                    className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground flex items-center"
+                  >
+                    <ChartNoAxesGantt className="h-4 w-4 " />
+                    Voir les details
+                  </Link>
+                </Button>
+
                 {/* MODIFY CAMPAIGN */}
                 <ModifyCampaign
                   audioCampaign={camp}

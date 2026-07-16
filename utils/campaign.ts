@@ -23,11 +23,13 @@ export const getCampaignStatus = (campaign: AudioCampaign): CampaignStatus => {
 
   const startDate = new Date(campaign.startDate);
 
+  // Début de la période d'enregistrement (J-1)
   const recordingStart = new Date(startDate);
   recordingStart.setDate(recordingStart.getDate() - 1);
 
+  // Fin de la campagne (duration en jours)
   const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + campaign.duration * 7);
+  endDate.setDate(endDate.getDate() + campaign.duration);
 
   if (now > endDate) {
     return "terminee";
@@ -37,5 +39,10 @@ export const getCampaignStatus = (campaign: AudioCampaign): CampaignStatus => {
     return "en_cours";
   }
 
+  if (now >= recordingStart) {
+    return "enregistrement";
+  }
+
+  // Avant la période d'enregistrement
   return "enregistrement";
 };
