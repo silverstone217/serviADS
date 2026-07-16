@@ -267,7 +267,11 @@ const MainComponent = ({ audioCampaigns }: AudioMainComponentProps) => {
               </CardContent>
 
               {/* Footer Card : Actions */}
-              <CardFooter className="bg-muted/30 px-6 py-3 border-t flex justify-end items-center gap-2">
+              <CardFooter
+                className="bg-muted/30 px-6 py-3 border-t grid md:grid-cols-3 gap-2
+                grid-cols-2
+              "
+              >
                 {/* View Campaign */}
                 <Button variant="ghost" size="sm" disabled={loading} asChild>
                   <Link
