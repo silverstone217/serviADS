@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
         where: { id: taxiUserId },
       });
 
-      if (!taxiExists) {
+      if (!taxiExists || taxiExists.isBanned) {
         return NextResponse.json(
           { error: true, message: "Utilisateur Taxi non trouvé ou invalide." },
           { status: 404 },

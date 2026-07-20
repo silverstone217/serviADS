@@ -49,6 +49,9 @@ export async function POST(request: NextRequest) {
       where: {
         id: campaignId,
       },
+      include: {
+        audioSubscribers: true,
+      },
     });
 
     // Campagne supprimée
@@ -67,6 +70,15 @@ export async function POST(request: NextRequest) {
       error: false,
       exists: true,
       active,
+      campaign: {
+        id: campaign.id,
+        name: campaign.name,
+        startDate: campaign.startDate,
+        duration: campaign.duration,
+        costPerAudio: campaign.costPerAudio,
+        audioMaxDuration: campaign.audioMaxDuration,
+        audios: campaign.audioSubscribers,
+      },
     });
   } catch (error) {
     console.log("CHECK_CAMPAIGN_ERROR", error);

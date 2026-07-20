@@ -28,6 +28,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // is user banned ?
+    const isBanned = isUserExist.isBanned;
+
+    if (isBanned) {
+      return NextResponse.json(
+        { error: true, message: "Vous avez ete banni!" },
+        { status: 400 },
+      );
+    }
+
     // COMPARE PASSWORD
     const comparePassword = await bcrypt.compare(
       password,
