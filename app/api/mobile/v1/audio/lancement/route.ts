@@ -38,20 +38,20 @@ export async function POST(request: NextRequest) {
     const logs: IncomingLog[] = body.logs || [];
     const taxiUserId: string = body.TaxiUserId;
 
+    const taxiExists = await prisma.taxiUser.findUnique({
+      where: { id: taxiUserId },
+    });
+
+    // Vérification stricte de l'existence du chauffeur de taxi
+    if (!taxiExists) {
+      return NextResponse.json(
+        { error: true, message: "Utilisateur Taxi non trouvé ou invalide." },
+        { status: 404 },
+      );
+    }
+
     // 3️⃣ TRAITEMENT ET SAUVEGARDE DES LOGS (Si présents)
     if (logs.length > 0) {
-      // Vérification stricte de l'existence du chauffeur de taxi
-      const taxiExists = await prisma.taxiUser.findUnique({
-        where: { id: taxiUserId },
-      });
-
-      if (!taxiExists || taxiExists.isBanned) {
-        return NextResponse.json(
-          { error: true, message: "Utilisateur Taxi non trouvé ou invalide." },
-          { status: 404 },
-        );
-      }
-
       // Traitement de chaque ligne de log reçue
       for (const log of logs) {
         // Vérification que la campagne ciblée par ce log existe bien dans notre DB
@@ -91,6 +91,8 @@ export async function POST(request: NextRequest) {
         });
       }
     }
+
+    const isBanned = taxiExists.isBanned;
 
     // 4️⃣ RÉCUPÉRATION DES CAMPAGNES POUR LE RETOUR MOBILE
     const campaigns = await prisma.audioCampaign.findMany({
@@ -139,15 +141,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: false,
-        campaign: {
-          id: currentCampaign.id,
-          name: currentCampaign.name,
-          startDate: currentCampaign.startDate,
-          duration: currentCampaign.duration,
-          costPerAudio: currentCampaign.costPerAudio,
-          audioMaxDuration: currentCampaign.audioMaxDuration,
-          audios: currentCampaign.audioSubscribers,
-        },
+
+        banned: isBanned,
+
+        campaign: currentCampaign
+          ? {
+              id: currentCampaign.id,
+              name: currentCampaign.name,
+              startDate: currentCampaign.startDate,
+              duration: currentCampaign.duration,
+              costPerAudio: currentCampaign.costPerAudio,
+              audioMaxDuration: currentCampaign.audioMaxDuration,
+
+              audios: isBanned
+                ? [] // interdit de télécharger
+                : currentCampaign.audioSubscribers,
+            }
+          : null,
       },
       { status: 200 },
     );
