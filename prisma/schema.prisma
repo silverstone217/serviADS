@@ -120,6 +120,10 @@ model AudioSubscriber {
   audioFile     String? //url from firebase
   audioDuration Float // in seconds
 
+  isBanned     Boolean   @default(false) @map("is_banned")
+  banReason    String?   @map("ban_reason")
+  banExpiresAt DateTime? @map("ban_expires_at")
+
   zone                String @default("kinshasa")
   taxiNumber          Int    @default(1)
   // ADDED LIMIT NUMBER OF DOWNLOADED (TO KNOW IF THE SOUND STILL CAN BE DOWNLOADED BASED ON TAXINUMBER)

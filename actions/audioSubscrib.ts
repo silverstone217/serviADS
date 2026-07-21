@@ -7,6 +7,7 @@ import {
   checkFlexpaiePaymentAfterDelais,
   processFlexpaiePayment,
 } from "./flexpaieAction";
+import { revalidatePath } from "next/cache";
 
 export type AudioSubcribersType = {
   audioCampaignId: string;
@@ -202,3 +203,29 @@ export const getAllAudiSubscribers = async () => {
   });
   return subs || [];
 };
+
+// BAN SUB _ AUDIO BY ID
+export async function toggleBanSubscriber(data: {
+  id: string;
+  isBanned: boolean;
+  banReason?: string;
+  banExpiresAt?: Date | null;
+  campaignId: string;
+}) {
+  try {
+    await prisma.audioSubscriber.update({
+      where: { id: data.id },
+      data: {
+        isBanned: data.isBanned,
+        banReason: data.isBanned ? data.banReason : null,
+        banExpiresAt: data.isBanned ? data.banExpiresAt : null,
+      },
+    });
+
+    revalidatePath(`/admins/campagne/${data.campaignId}`); // Ajustez le chemin de votre page admin si besoin
+    return { success: true };
+  } catch (error) {
+    console.error("Erreur lors de la modification du statut :", error);
+    return { success: false, message: "Une erreur est survenue" };
+  }
+}

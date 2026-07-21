@@ -102,6 +102,7 @@ export async function POST(request: NextRequest) {
             limitDownloadNumber: {
               gt: 0,
             },
+            isBanned: false,
           },
           select: {
             id: true,
