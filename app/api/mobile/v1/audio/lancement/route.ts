@@ -137,6 +137,37 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // update price and download Number
+    await prisma.taxiCampaignConfig.upsert({
+      where: {
+        campaignId_taxiUserId: {
+          campaignId: currentCampaign.id,
+          taxiUserId: taxiExists.id,
+        },
+      },
+
+      update: {
+        downloadedSounds: currentCampaign.audioSubscribers.length,
+
+        amount:
+          (currentCampaign.costPerAudio *
+            currentCampaign.audioSubscribers.length) /
+          2,
+      },
+
+      create: {
+        campaignId: currentCampaign.id,
+        taxiUserId: taxiExists.id,
+
+        downloadedSounds: currentCampaign.audioSubscribers.length,
+
+        amount:
+          (currentCampaign.costPerAudio *
+            currentCampaign.audioSubscribers.length) /
+          2,
+      },
+    });
+
     // RETOUR AVEC LA CAMPAGNE FRAICHEMENT ACTIVÉE
     return NextResponse.json(
       {

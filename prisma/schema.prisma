@@ -101,6 +101,7 @@ model AudioCampaign {
 
   audioSubscribers AudioSubscriber[]
   logs             AudioLogs[]
+  taxiConfigs      TaxiCampaignConfig[]
 }
 
 enum PaymentMethod {
@@ -160,7 +161,8 @@ model TaxiUser {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  logs AudioLogs[]
+  logs        AudioLogs[]
+  taxiConfigs TaxiCampaignConfig[]
 }
 
 model AudioLogs {
@@ -190,3 +192,27 @@ model AudioLogs {
 //   paye
 //   annule
 // }
+
+model TaxiCampaignConfig {
+  id String @id @default(cuid())
+
+  campaignId String
+  taxiUserId String
+
+  downloadedSounds Int   @default(0)
+  amount           Float @default(0)
+
+  // Permet de savoir si le taxi a déjà été payé
+  isPaid Boolean   @default(false)
+  paidAt DateTime?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  campaign AudioCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  taxi     TaxiUser      @relation(fields: [taxiUserId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, taxiUserId])
+  @@index([campaignId])
+  @@index([taxiUserId])
+}
